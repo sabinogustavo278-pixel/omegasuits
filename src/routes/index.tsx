@@ -1,24 +1,76 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { HeroSection } from "@/components/HeroSection";
+import { ProductCard } from "@/components/ProductCard";
+import { products } from "@/data/products";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      <main className="flex-1">
+        <HeroSection />
+
+        <section className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
+          <div className="flex flex-col items-end justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.4em] text-accent">
+                Seleção do ateliê
+              </p>
+              <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
+                Peças da nova coleção
+              </h2>
+            </div>
+            <Link
+              to="/ternos"
+              className="text-[11px] uppercase tracking-[0.3em] text-foreground underline-offset-8 hover:underline"
+            >
+              Explorar tudo →
+            </Link>
+          </div>
+          <div className="mt-14 grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-border/60 bg-secondary/50">
+          <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-3 md:px-10">
+            <Pillar
+              kicker="Sob medida"
+              title="Duas provas, uma vida"
+              body="Cada peça nasce de duas provas presenciais em nosso ateliê, com cortes ajustados ao seu porte."
+            />
+            <Pillar
+              kicker="Tecidos"
+              title="Lã italiana Super 130's"
+              body="Trabalhamos exclusivamente com casas de tecelagem centenárias em Biella e Como."
+            />
+            <Pillar
+              kicker="Feito à mão"
+              title="Costura interna à agulha"
+              body="Entretela flutuante, casas de botão e ombreiras montadas ponto a ponto — como manda a tradição."
+            />
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function Pillar({ kicker, title, body }: { kicker: string; title: string; body: string }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.4em] text-accent">{kicker}</p>
+      <h3 className="mt-3 font-serif text-2xl text-foreground">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{body}</p>
     </div>
   );
 }
