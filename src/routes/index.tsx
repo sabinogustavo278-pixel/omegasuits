@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroSection } from "@/components/HeroSection";
@@ -17,23 +17,7 @@ function Home() {
         <HeroSection />
 
         <section className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
-          <div className="flex flex-col items-end justify-between gap-6 md:flex-row md:items-end">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.4em] text-accent">
-                Seleção do ateliê
-              </p>
-              <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
-                Peças da nova coleção
-              </h2>
-            </div>
-            <Link
-              to="/ternos"
-              className="text-[11px] uppercase tracking-[0.3em] text-foreground underline-offset-8 hover:underline"
-            >
-              Explorar tudo →
-            </Link>
-          </div>
-          <div className="mt-14 grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
