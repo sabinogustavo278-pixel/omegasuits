@@ -3,7 +3,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatusPill } from "@/components/admin/DataTable";
 
-export const Route = createFileRoute("/admin/fornecedores")({
+export const Route = createFileRoute("/fornecedores")({
   head: () => ({
     meta: [
       { title: "Fornecedores — Omega Admin" },

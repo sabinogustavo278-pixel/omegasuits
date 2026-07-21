@@ -10,23 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TernosRouteImport } from './routes/ternos'
+import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FornecedoresRouteImport } from './routes/fornecedores'
+import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
-import { Route as AdminFornecedoresRouteImport } from './routes/admin.fornecedores'
-import { Route as AdminEstoqueRouteImport } from './routes/admin.estoque'
-import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
-import { Route as AdminFornecedoresPedidosRouteImport } from './routes/admin.fornecedores.pedidos'
+import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores.pedido'
 
 const TernosRoute = TernosRouteImport.update({
   id: '/ternos',
   path: '/ternos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,9 +37,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FornecedoresRoute = FornecedoresRouteImport.update({
+  id: '/fornecedores',
+  path: '/fornecedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CamisariaRoute = CamisariaRouteImport.update({
@@ -49,11 +67,6 @@ const CalcadosRoute = CalcadosRouteImport.update({
   path: '/calcados',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AcessoriosRoute = AcessoriosRouteImport.update({
   id: '/acessorios',
   path: '/acessorios',
@@ -64,144 +77,111 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
+const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
+  id: '/pedido',
+  path: '/pedido',
+  getParentRoute: () => FornecedoresRoute,
 } as any)
-const AdminProdutosRoute = AdminProdutosRouteImport.update({
-  id: '/produtos',
-  path: '/produtos',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFornecedoresRoute = AdminFornecedoresRouteImport.update({
-  id: '/fornecedores',
-  path: '/fornecedores',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminEstoqueRoute = AdminEstoqueRouteImport.update({
-  id: '/estoque',
-  path: '/estoque',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
-  id: '/categorias',
-  path: '/categorias',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFornecedoresPedidosRoute =
-  AdminFornecedoresPedidosRouteImport.update({
-    id: '/pedidos',
-    path: '/pedidos',
-    getParentRoute: () => AdminFornecedoresRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
-  '/admin': typeof AdminRouteWithChildren
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
-  '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/estoque': typeof AdminEstoqueRoute
-  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
-  '/admin/produtos': typeof AdminProdutosRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
-  '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/estoque': typeof AdminEstoqueRoute
-  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
-  '/admin/produtos': typeof AdminProdutosRoute
-  '/admin': typeof AdminIndexRoute
-  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
-  '/admin': typeof AdminRouteWithChildren
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
-  '/admin/categorias': typeof AdminCategoriasRoute
-  '/admin/estoque': typeof AdminEstoqueRoute
-  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
-  '/admin/produtos': typeof AdminProdutosRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/acessorios'
-    | '/admin'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
-    | '/admin/categorias'
-    | '/admin/estoque'
-    | '/admin/fornecedores'
-    | '/admin/produtos'
-    | '/admin/'
-    | '/admin/fornecedores/pedidos'
+    | '/fornecedores/pedido'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/acessorios'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
-    | '/admin/categorias'
-    | '/admin/estoque'
-    | '/admin/fornecedores'
-    | '/admin/produtos'
-    | '/admin'
-    | '/admin/fornecedores/pedidos'
+    | '/fornecedores/pedido'
   id:
     | '__root__'
     | '/'
     | '/acessorios'
-    | '/admin'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
-    | '/admin/categorias'
-    | '/admin/estoque'
-    | '/admin/fornecedores'
-    | '/admin/produtos'
-    | '/admin/'
-    | '/admin/fornecedores/pedidos'
+    | '/fornecedores/pedido'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcessoriosRoute: typeof AcessoriosRoute
-  AdminRoute: typeof AdminRouteWithChildren
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
+  CategoriasRoute: typeof CategoriasRoute
   DashboardRoute: typeof DashboardRoute
+  EstoqueRoute: typeof EstoqueRoute
+  FornecedoresRoute: typeof FornecedoresRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
 }
 
@@ -214,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TernosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -221,11 +208,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fornecedores': {
+      id: '/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/fornecedores'
+      preLoaderRoute: typeof FornecedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/camisaria': {
@@ -242,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalcadosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/acessorios': {
       id: '/acessorios'
       path: '/acessorios'
@@ -263,100 +264,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/produtos': {
-      id: '/admin/produtos'
-      path: '/produtos'
-      fullPath: '/admin/produtos'
-      preLoaderRoute: typeof AdminProdutosRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/fornecedores': {
-      id: '/admin/fornecedores'
-      path: '/fornecedores'
-      fullPath: '/admin/fornecedores'
-      preLoaderRoute: typeof AdminFornecedoresRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/estoque': {
-      id: '/admin/estoque'
-      path: '/estoque'
-      fullPath: '/admin/estoque'
-      preLoaderRoute: typeof AdminEstoqueRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/categorias': {
-      id: '/admin/categorias'
-      path: '/categorias'
-      fullPath: '/admin/categorias'
-      preLoaderRoute: typeof AdminCategoriasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/fornecedores/pedidos': {
-      id: '/admin/fornecedores/pedidos'
-      path: '/pedidos'
-      fullPath: '/admin/fornecedores/pedidos'
-      preLoaderRoute: typeof AdminFornecedoresPedidosRouteImport
-      parentRoute: typeof AdminFornecedoresRoute
+    '/fornecedores/pedido': {
+      id: '/fornecedores/pedido'
+      path: '/pedido'
+      fullPath: '/fornecedores/pedido'
+      preLoaderRoute: typeof FornecedoresPedidoRouteImport
+      parentRoute: typeof FornecedoresRoute
     }
   }
 }
 
-interface AdminFornecedoresRouteChildren {
-  AdminFornecedoresPedidosRoute: typeof AdminFornecedoresPedidosRoute
+interface FornecedoresRouteChildren {
+  FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
 }
 
-const AdminFornecedoresRouteChildren: AdminFornecedoresRouteChildren = {
-  AdminFornecedoresPedidosRoute: AdminFornecedoresPedidosRoute,
+const FornecedoresRouteChildren: FornecedoresRouteChildren = {
+  FornecedoresPedidoRoute: FornecedoresPedidoRoute,
 }
 
-const AdminFornecedoresRouteWithChildren =
-  AdminFornecedoresRoute._addFileChildren(AdminFornecedoresRouteChildren)
-
-interface AdminRouteChildren {
-  AdminCategoriasRoute: typeof AdminCategoriasRoute
-  AdminEstoqueRoute: typeof AdminEstoqueRoute
-  AdminFornecedoresRoute: typeof AdminFornecedoresRouteWithChildren
-  AdminProdutosRoute: typeof AdminProdutosRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminCategoriasRoute: AdminCategoriasRoute,
-  AdminEstoqueRoute: AdminEstoqueRoute,
-  AdminFornecedoresRoute: AdminFornecedoresRouteWithChildren,
-  AdminProdutosRoute: AdminProdutosRoute,
-  AdminIndexRoute: AdminIndexRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+const FornecedoresRouteWithChildren = FornecedoresRoute._addFileChildren(
+  FornecedoresRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
-  AdminRoute: AdminRouteWithChildren,
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
+  CategoriasRoute: CategoriasRoute,
   DashboardRoute: DashboardRoute,
+  EstoqueRoute: EstoqueRoute,
+  FornecedoresRoute: FornecedoresRouteWithChildren,
   LoginRoute: LoginRoute,
+  ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

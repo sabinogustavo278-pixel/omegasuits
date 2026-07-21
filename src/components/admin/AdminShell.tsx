@@ -1,22 +1,21 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
-import { LogOut, Truck, ClipboardList, LayoutGrid, Package, Warehouse, LayoutDashboard, Menu, X } from "lucide-react";
-import { isAuthenticated, signOut } from "@/lib/mock-auth";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useState, type ReactNode } from "react";
+import { Truck, ClipboardList, LayoutGrid, Package, Warehouse, LayoutDashboard, Menu, X } from "lucide-react";
 
 const groups = [
   {
     label: "Fornecedores",
     items: [
-      { to: "/admin/fornecedores", label: "Cadastro", icon: Truck },
-      { to: "/admin/fornecedores/pedidos", label: "Pedido", icon: ClipboardList },
+      { to: "/fornecedores", label: "Cadastro", icon: Truck },
+      { to: "/fornecedores/pedido", label: "Pedido", icon: ClipboardList },
     ],
   },
   {
     label: "Loja",
     items: [
-      { to: "/admin/categorias", label: "Categorias", icon: LayoutGrid },
-      { to: "/admin/produtos", label: "Produtos", icon: Package },
-      { to: "/admin/estoque", label: "Estoque", icon: Warehouse },
+      { to: "/categorias", label: "Categorias", icon: LayoutGrid },
+      { to: "/produtos", label: "Produtos", icon: Package },
+      { to: "/estoque", label: "Estoque", icon: Warehouse },
     ],
   },
 ] as const;
@@ -32,17 +31,8 @@ export function AdminShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
-  const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  useEffect(() => {
-    if (!isAuthenticated()) navigate({ to: "/login", replace: true });
-    else setReady(true);
-  }, [navigate]);
-
-  if (!ready) return null;
 
   return (
     <div className="flex min-h-screen bg-secondary/40 text-foreground">
@@ -53,7 +43,7 @@ export function AdminShell({
         }`}
       >
         <div className="flex items-center justify-between px-8 py-8">
-          <Link to="/admin" className="flex flex-col leading-none">
+          <Link to="/dashboard" className="flex flex-col leading-none">
             <span className="font-serif text-2xl tracking-[0.2em]">OMEGA</span>
             <span className="mt-1 text-[9px] uppercase tracking-[0.5em] text-accent">
               Admin · Ateliê
@@ -70,9 +60,9 @@ export function AdminShell({
 
         <nav className="mt-4 px-4">
           <Link
-            to="/admin"
+            to="/dashboard"
             className={`mb-6 flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.28em] transition-colors ${
-              pathname === "/admin"
+              pathname === "/dashboard"
                 ? "border-l-2 border-accent bg-white/5 text-accent"
                 : "border-l-2 border-transparent text-primary-foreground/70 hover:text-primary-foreground"
             }`}
@@ -111,19 +101,6 @@ export function AdminShell({
             </div>
           ))}
         </nav>
-
-        <div className="mt-auto border-t border-white/10 px-8 py-6">
-          <button
-            onClick={() => {
-              signOut();
-              navigate({ to: "/", replace: true });
-            }}
-            className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60 hover:text-accent"
-          >
-            <LogOut className="h-4 w-4" strokeWidth={1.25} />
-            Sair
-          </button>
-        </div>
       </aside>
 
       {/* Main */}
@@ -147,10 +124,10 @@ export function AdminShell({
             </div>
           </div>
           <Link
-            to="/dashboard"
+            to="/"
             className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground md:inline"
           >
-            ← Minha conta
+            ← Ir para a loja
           </Link>
         </header>
 

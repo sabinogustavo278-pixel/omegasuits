@@ -4,7 +4,7 @@ import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
 import { formatPrice } from "@/data/products";
 
-export const Route = createFileRoute("/admin/fornecedores/pedidos")({
+export const Route = createFileRoute("/fornecedores/pedido")({
   head: () => ({
     meta: [
       { title: "Pedidos de compra — Omega Admin" },

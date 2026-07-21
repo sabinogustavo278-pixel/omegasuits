@@ -4,7 +4,7 @@ import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatusPill } from "@/components/admin/DataTable";
 import { formatPrice, products } from "@/data/products";
 
-export const Route = createFileRoute("/admin/produtos")({
+export const Route = createFileRoute("/produtos")({
   head: () => ({
     meta: [
       { title: "Produtos — Omega Admin" },
