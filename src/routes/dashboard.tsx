@@ -72,15 +72,23 @@ function DashboardPage() {
                 Cliente Omega desde outubro de 2019.
               </p>
             </div>
-            <button
-              onClick={() => {
-                signOut();
-                navigate({ to: "/", replace: true });
-              }}
-              className="border border-border px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
-            >
-              Sair
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/admin"
+                className="border border-foreground bg-foreground px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-background transition-colors hover:bg-transparent hover:text-foreground"
+              >
+                Gerenciar loja
+              </Link>
+              <button
+                onClick={() => {
+                  signOut();
+                  navigate({ to: "/", replace: true });
+                }}
+                className="border border-border px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              >
+                Sair
+              </button>
+            </div>
           </div>
         </section>
 
