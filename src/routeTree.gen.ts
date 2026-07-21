@@ -14,8 +14,15 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminProdutosRouteImport } from './routes/admin.produtos'
+import { Route as AdminFornecedoresRouteImport } from './routes/admin.fornecedores'
+import { Route as AdminEstoqueRouteImport } from './routes/admin.estoque'
+import { Route as AdminCategoriasRouteImport } from './routes/admin.categorias'
+import { Route as AdminFornecedoresPedidosRouteImport } from './routes/admin.fornecedores.pedidos'
 
 const TernosRoute = TernosRouteImport.update({
   id: '/ternos',
@@ -42,6 +49,11 @@ const CalcadosRoute = CalcadosRouteImport.update({
   path: '/calcados',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcessoriosRoute = AcessoriosRouteImport.update({
   id: '/acessorios',
   path: '/acessorios',
@@ -52,15 +64,53 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProdutosRoute = AdminProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFornecedoresRoute = AdminFornecedoresRouteImport.update({
+  id: '/fornecedores',
+  path: '/fornecedores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEstoqueRoute = AdminEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriasRoute = AdminCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFornecedoresPedidosRoute =
+  AdminFornecedoresPedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => AdminFornecedoresRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/ternos': typeof TernosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
+  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,27 +120,47 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/ternos': typeof TernosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
+  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
+  '/admin': typeof AdminRouteWithChildren
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/ternos': typeof TernosRoute
+  '/admin/categorias': typeof AdminCategoriasRoute
+  '/admin/estoque': typeof AdminEstoqueRoute
+  '/admin/fornecedores': typeof AdminFornecedoresRouteWithChildren
+  '/admin/produtos': typeof AdminProdutosRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/fornecedores/pedidos': typeof AdminFornecedoresPedidosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/acessorios'
+    | '/admin'
     | '/calcados'
     | '/camisaria'
     | '/dashboard'
     | '/login'
     | '/ternos'
+    | '/admin/categorias'
+    | '/admin/estoque'
+    | '/admin/fornecedores'
+    | '/admin/produtos'
+    | '/admin/'
+    | '/admin/fornecedores/pedidos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,20 +170,34 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/ternos'
+    | '/admin/categorias'
+    | '/admin/estoque'
+    | '/admin/fornecedores'
+    | '/admin/produtos'
+    | '/admin'
+    | '/admin/fornecedores/pedidos'
   id:
     | '__root__'
     | '/'
     | '/acessorios'
+    | '/admin'
     | '/calcados'
     | '/camisaria'
     | '/dashboard'
     | '/login'
     | '/ternos'
+    | '/admin/categorias'
+    | '/admin/estoque'
+    | '/admin/fornecedores'
+    | '/admin/produtos'
+    | '/admin/'
+    | '/admin/fornecedores/pedidos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcessoriosRoute: typeof AcessoriosRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
   DashboardRoute: typeof DashboardRoute
@@ -158,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalcadosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/acessorios': {
       id: '/acessorios'
       path: '/acessorios'
@@ -172,12 +263,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/produtos': {
+      id: '/admin/produtos'
+      path: '/produtos'
+      fullPath: '/admin/produtos'
+      preLoaderRoute: typeof AdminProdutosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fornecedores': {
+      id: '/admin/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/admin/fornecedores'
+      preLoaderRoute: typeof AdminFornecedoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/estoque': {
+      id: '/admin/estoque'
+      path: '/estoque'
+      fullPath: '/admin/estoque'
+      preLoaderRoute: typeof AdminEstoqueRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categorias': {
+      id: '/admin/categorias'
+      path: '/categorias'
+      fullPath: '/admin/categorias'
+      preLoaderRoute: typeof AdminCategoriasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/fornecedores/pedidos': {
+      id: '/admin/fornecedores/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/fornecedores/pedidos'
+      preLoaderRoute: typeof AdminFornecedoresPedidosRouteImport
+      parentRoute: typeof AdminFornecedoresRoute
+    }
   }
 }
+
+interface AdminFornecedoresRouteChildren {
+  AdminFornecedoresPedidosRoute: typeof AdminFornecedoresPedidosRoute
+}
+
+const AdminFornecedoresRouteChildren: AdminFornecedoresRouteChildren = {
+  AdminFornecedoresPedidosRoute: AdminFornecedoresPedidosRoute,
+}
+
+const AdminFornecedoresRouteWithChildren =
+  AdminFornecedoresRoute._addFileChildren(AdminFornecedoresRouteChildren)
+
+interface AdminRouteChildren {
+  AdminCategoriasRoute: typeof AdminCategoriasRoute
+  AdminEstoqueRoute: typeof AdminEstoqueRoute
+  AdminFornecedoresRoute: typeof AdminFornecedoresRouteWithChildren
+  AdminProdutosRoute: typeof AdminProdutosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminCategoriasRoute: AdminCategoriasRoute,
+  AdminEstoqueRoute: AdminEstoqueRoute,
+  AdminFornecedoresRoute: AdminFornecedoresRouteWithChildren,
+  AdminProdutosRoute: AdminProdutosRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
+  AdminRoute: AdminRouteWithChildren,
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
   DashboardRoute: DashboardRoute,
@@ -187,13 +350,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

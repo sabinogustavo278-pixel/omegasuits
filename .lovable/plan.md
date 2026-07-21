@@ -1,61 +1,74 @@
-# Plano — Omega Suits
+# Plano — Módulos de Gerenciamento (Fornecedores e Loja)
 
-Landing page + catálogo + login + dashboard, com dados mockados (sem backend/banco).
+Adicionar área administrativa com rotas dedicadas para cada tela, seguindo a identidade Omega (marinho/carvão/marfim, dourado, Cormorant + Inter). Dados 100% mockados (sem backend), coerente com o restante do projeto.
 
-## Rotas (TanStack Router)
+## Rotas novas (uma página = uma rota)
 
-- `src/routes/index.tsx` — Landing (header + hero + grid de produtos + footer).
-- `src/routes/ternos.tsx`, `camisaria.tsx`, `calcados.tsx`, `acessorios.tsx` — Catálogos por categoria (mesma grade, dados filtrados).
-- `src/routes/login.tsx` — Página de login (mock; salva flag em localStorage e redireciona a `/dashboard`).
-- `src/routes/dashboard.tsx` — Área da conta do cliente (mock).
+```
+src/routes/
+  admin.tsx                      -> layout admin (sidebar + Outlet)
+  admin.index.tsx                -> /admin (visão geral simples)
+  admin.fornecedores.tsx         -> /admin/fornecedores (Cadastro)
+  admin.fornecedores.pedidos.tsx -> /admin/fornecedores/pedidos (Pedido de compra)
+  admin.categorias.tsx           -> /admin/categorias
+  admin.produtos.tsx             -> /admin/produtos
+  admin.estoque.tsx              -> /admin/estoque
+```
 
-Guarda simples: `dashboard.tsx` verifica flag mock no `beforeLoad` client-side; se ausente, redireciona a `/login`. Sem Supabase.
+Acesso protegido pelo mock-auth existente (redireciona para `/login` se não autenticado), igual ao dashboard.
 
-## Estrutura visual
+## Layout administrativo
 
-### Design system (src/styles.css)
-- Paleta em oklch:
-  - Azul marinho profundo (primária), preto, cinza escuro, branco/off-white, dourado sutil como accent.
-- Tipografia via `<link>` em `__root.tsx`:
-  - Títulos: **Cormorant Garamond** (serif elegante).
-  - Corpo: **Inter** (sans-serif limpa).
-- Tokens: `--primary` (marinho), `--accent` (dourado), `--background` (off-white), `--foreground` (grafite), `--muted`.
+`AdminShell` com:
+- Sidebar esquerda com dois grupos: **Fornecedores** (Cadastro, Pedido) e **Loja** (Categorias, Produtos, Estoque).
+- Topbar com título da tela, breadcrumb sutil e usuário.
+- Conteúdo em card marfim sobre fundo carvão claro, detalhes em dourado.
 
-### Componentes reutilizáveis (`src/components/`)
-- `SiteHeader.tsx` — logo "OMEGA SUITS" serifado + nav (Ternos, Camisaria, Calçados, Acessórios) + ícone conta (link `/login` ou `/dashboard`).
-- `SiteFooter.tsx` — rodapé minimalista (marca, colunas curtas, copyright).
-- `ProductCard.tsx` — foto (aspect ratio retrato), nome, preço em BRL, hover sutil.
-- `HeroSection.tsx` — título elegante, subtítulo, botão "Ver Coleção".
-- `data/products.ts` — array mock (Terno Marinho, Sapato Oxford, Gravata de Seda, + 3 extras para preencher a grade).
+## Padrão obrigatório em toda tela de cadastro
 
-### Landing (`/`)
-1. Header
-2. Hero em tela cheia com imagem elegante de alfaiataria (gerada via imagegen) + CTA "Ver Coleção" → `/ternos`.
-3. Seção "Nova Coleção" — grade 3 colunas (6 produtos mock).
-4. Faixa editorial curta ("Alfaiataria sob medida desde…").
-5. Footer.
+Cabeçalho da página com três botões, sempre na mesma ordem:
+1. **Template** — baixa um modelo (mock: gera CSV vazio via Blob).
+2. **Importar** — abre modal para upload (mock: apenas visual).
+3. **Novo** — abre drawer/modal com formulário da entidade.
 
-### Catálogos (`/ternos`, etc.)
-- Header + título da categoria + grid de produtos mock + footer.
+Componentizado em `src/components/admin/CadastroActions.tsx` para reuso nas 5 telas de cadastro (Fornecedores, Pedido, Categorias, Produtos, Estoque).
 
-### Login (`/login`)
-- Layout centralizado, split ou card único sobre fundo escuro.
-- Campos email/senha + botão "Entrar". No submit: `localStorage.setItem('omega_auth','1')` e navigate `/dashboard`.
-- Link "Criar conta" (não funcional, apenas visual).
+## Conteúdo de cada tela
 
-### Dashboard (`/dashboard`)
-- Header + saudação "Olá, Cliente".
-- Cards: Pedidos recentes (mock: 2-3 pedidos), Endereço de entrega, Wishlist, Dados da conta.
-- Botão "Sair" → limpa flag e volta a `/`.
+### Fornecedores — Cadastro (`/admin/fornecedores`)
+- Ações: Template · Importar · Novo Fornecedor.
+- Tabela: Razão social, CNPJ, Contato, Cidade/UF, Categoria, Status.
+- Filtros: busca + status. Linhas mock (Vitali Tecidos, Como Silks, Northampton Leather, etc.).
 
-## Imagens
-Gerar via `imagegen--generate_image` em `src/assets/`:
-- `hero-tailoring.jpg` — foto editorial de alfaiataria.
-- `product-suit.jpg`, `product-oxford.jpg`, `product-tie.jpg`, `product-shirt.jpg`, `product-belt.jpg`, `product-cufflinks.jpg`.
+### Fornecedores — Pedido (`/admin/fornecedores/pedidos`)
+- Ações: Template · Importar · Novo Pedido.
+- Tabela: Nº do pedido, Fornecedor, Emissão, Previsão, Itens, Total, Status (Rascunho, Enviado, Recebido).
+- Card lateral com resumo (Em aberto, Recebidos no mês).
 
-## SEO
-- `__root.tsx`: título "Omega Suits — Alfaiataria Clássica Masculina" + description + og.
-- Cada rota com `head()` próprio.
+### Loja — Categorias (`/admin/categorias`)
+- Ações: Template · Importar · Nova Categoria.
+- Lista hierárquica (Ternos → Marinho/Grafite; Camisaria; Calçados; Acessórios) com contagem de produtos.
+
+### Loja — Produtos (`/admin/produtos`)
+- Ações: Template · Importar · Novo Produto.
+- Tabela: Imagem, SKU, Nome, Categoria, Preço, Estoque, Status. Reutiliza mock em `src/data/products.ts` acrescentando SKU/estoque.
+
+### Loja — Estoque (`/admin/estoque`)
+- Ações: Template · Importar · Nova Movimentação.
+- Tabela: SKU, Produto, Depósito, Saldo, Reservado, Disponível, Última movimentação.
+- Cards no topo: Total em peças, SKUs críticos, Rupturas.
+
+## Design tokens
+Reaproveita variáveis já em `src/styles.css` (marinho, dourado, marfim). Nenhum token novo; apenas classes utilitárias.
+
+## SEO / head()
+Cada rota com `head()` próprio (title/description) — ex.: "Fornecedores — Omega Suits Admin".
+
+## Detalhes técnicos
+- Layout `admin.tsx` usa `useEffect` + `isAuthenticated()` (mesmo padrão do `dashboard.tsx`) e renderiza `<Outlet />`.
+- `CadastroActions` recebe props `onTemplate`, `onImport`, `onNew` e labels opcionais.
+- Formulários "Novo …" usam `Sheet`/`Dialog` do shadcn (já disponível).
+- Sem alteração no header público do site; a área admin não aparece no menu principal — acesso via `/admin` a partir do dashboard (adicionar link "Gerenciar loja" no dashboard).
 
 ## Fora do escopo
-- Sem Lovable Cloud/Supabase, sem carrinho funcional, sem checkout, sem persistência real. Tudo mockado.
+- Sem persistência real, sem CRUD funcional, sem validação server-side, sem paginação real. Estado local com `useState` apenas.
