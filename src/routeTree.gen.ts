@@ -10,16 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TernosRouteImport } from './routes/ternos'
+import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FornecedoresRouteImport } from './routes/fornecedores'
+import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores.pedido'
 
 const TernosRoute = TernosRouteImport.update({
   id: '/ternos',
   path: '/ternos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdutosRoute = ProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -27,9 +37,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FornecedoresRoute = FornecedoresRouteImport.update({
+  id: '/fornecedores',
+  path: '/fornecedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CamisariaRoute = CamisariaRouteImport.update({
@@ -52,24 +77,39 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
+  id: '/pedido',
+  path: '/pedido',
+  getParentRoute: () => FornecedoresRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,9 +117,14 @@ export interface FileRoutesById {
   '/acessorios': typeof AcessoriosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
+  '/categorias': typeof CategoriasRoute
   '/dashboard': typeof DashboardRoute
+  '/estoque': typeof EstoqueRoute
+  '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,27 +133,42 @@ export interface FileRouteTypes {
     | '/acessorios'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
+    | '/fornecedores/pedido'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/acessorios'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
+    | '/fornecedores/pedido'
   id:
     | '__root__'
     | '/'
     | '/acessorios'
     | '/calcados'
     | '/camisaria'
+    | '/categorias'
     | '/dashboard'
+    | '/estoque'
+    | '/fornecedores'
     | '/login'
+    | '/produtos'
     | '/ternos'
+    | '/fornecedores/pedido'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,8 +176,12 @@ export interface RootRouteChildren {
   AcessoriosRoute: typeof AcessoriosRoute
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
+  CategoriasRoute: typeof CategoriasRoute
   DashboardRoute: typeof DashboardRoute
+  EstoqueRoute: typeof EstoqueRoute
+  FornecedoresRoute: typeof FornecedoresRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
 }
 
@@ -130,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TernosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/produtos': {
+      id: '/produtos'
+      path: '/produtos'
+      fullPath: '/produtos'
+      preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -137,11 +208,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fornecedores': {
+      id: '/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/fornecedores'
+      preLoaderRoute: typeof FornecedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/camisaria': {
@@ -172,16 +264,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fornecedores/pedido': {
+      id: '/fornecedores/pedido'
+      path: '/pedido'
+      fullPath: '/fornecedores/pedido'
+      preLoaderRoute: typeof FornecedoresPedidoRouteImport
+      parentRoute: typeof FornecedoresRoute
+    }
   }
 }
+
+interface FornecedoresRouteChildren {
+  FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
+}
+
+const FornecedoresRouteChildren: FornecedoresRouteChildren = {
+  FornecedoresPedidoRoute: FornecedoresPedidoRoute,
+}
+
+const FornecedoresRouteWithChildren = FornecedoresRoute._addFileChildren(
+  FornecedoresRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
+  CategoriasRoute: CategoriasRoute,
   DashboardRoute: DashboardRoute,
+  EstoqueRoute: EstoqueRoute,
+  FornecedoresRoute: FornecedoresRouteWithChildren,
   LoginRoute: LoginRoute,
+  ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
 }
 export const routeTree = rootRouteImport
