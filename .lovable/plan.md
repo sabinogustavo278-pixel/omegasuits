@@ -1,74 +1,52 @@
-# Plano — Módulos de Gerenciamento (Fornecedores e Loja)
+## Correções na área de gerenciamento
 
-Adicionar área administrativa com rotas dedicadas para cada tela, seguindo a identidade Omega (marinho/carvão/marfim, dourado, Cormorant + Inter). Dados 100% mockados (sem backend), coerente com o restante do projeto.
+Remover auth guard e reorganizar as rotas para o nível raiz, sem prefixo `/admin`.
 
-## Rotas novas (uma página = uma rota)
+### Novas rotas (nível raiz)
 
 ```
 src/routes/
-  admin.tsx                      -> layout admin (sidebar + Outlet)
-  admin.index.tsx                -> /admin (visão geral simples)
-  admin.fornecedores.tsx         -> /admin/fornecedores (Cadastro)
-  admin.fornecedores.pedidos.tsx -> /admin/fornecedores/pedidos (Pedido de compra)
-  admin.categorias.tsx           -> /admin/categorias
-  admin.produtos.tsx             -> /admin/produtos
-  admin.estoque.tsx              -> /admin/estoque
+  dashboard.tsx              -> /dashboard       (já existe, será ajustado)
+  fornecedores.tsx           -> /fornecedores    (cadastro)
+  fornecedores.pedido.tsx    -> /fornecedores/pedido
+  categorias.tsx             -> /categorias
+  produtos.tsx               -> /produtos
+  estoque.tsx                -> /estoque
 ```
 
-Acesso protegido pelo mock-auth existente (redireciona para `/login` se não autenticado), igual ao dashboard.
+Observação: o plano anterior mencionava só `/fornecedores`, `/fornecedores/pedido`, `/categorias` e `/produtos`. Mantenho `/estoque` porque a tela já existe e faz parte do grupo Loja — se preferir remover também, é só sinalizar.
 
-## Layout administrativo
+### Arquivos a excluir
 
-`AdminShell` com:
-- Sidebar esquerda com dois grupos: **Fornecedores** (Cadastro, Pedido) e **Loja** (Categorias, Produtos, Estoque).
-- Topbar com título da tela, breadcrumb sutil e usuário.
-- Conteúdo em card marfim sobre fundo carvão claro, detalhes em dourado.
+- `src/routes/admin.tsx`
+- `src/routes/admin.index.tsx`
+- `src/routes/admin.fornecedores.tsx`
+- `src/routes/admin.fornecedores.pedidos.tsx`
+- `src/routes/admin.categorias.tsx`
+- `src/routes/admin.produtos.tsx`
+- `src/routes/admin.estoque.tsx`
 
-## Padrão obrigatório em toda tela de cadastro
+### Ajustes de código
 
-Cabeçalho da página com três botões, sempre na mesma ordem:
-1. **Template** — baixa um modelo (mock: gera CSV vazio via Blob).
-2. **Importar** — abre modal para upload (mock: apenas visual).
-3. **Novo** — abre drawer/modal com formulário da entidade.
+1. **`AdminShell.tsx`**
+   - Remover `useEffect` + `isAuthenticated()` + redirect para `/login`. Sem auth guard.
+   - Remover botão "Sair" (ou transformar em link para `/`, sem `signOut`).
+   - Atualizar `groups` para novos caminhos: `/fornecedores`, `/fornecedores/pedido`, `/categorias`, `/produtos`, `/estoque`.
+   - Link do logo passa a apontar para `/dashboard` (nova "visão geral").
 
-Componentizado em `src/components/admin/CadastroActions.tsx` para reuso nas 5 telas de cadastro (Fornecedores, Pedido, Categorias, Produtos, Estoque).
+2. **`dashboard.tsx`**
+   - Remover `useEffect` + `isAuthenticated()` — acesso direto pela URL.
+   - Remover botão "Sair".
+   - Renderizar via `AdminShell` para virar a "visão geral" do painel (atalhos + KPIs que estavam em `admin.index.tsx`), preservando o conteúdo atual de "Minha conta" abaixo — ou substituir totalmente pela visão geral. **Decisão adotada**: transformar `/dashboard` na visão geral do painel (padrão das outras telas admin, com sidebar). O conteúdo antigo "Minha conta / Pedidos recentes / Wishlist" sai. Se preferir manter o conteúdo de conta, sinalize.
 
-## Conteúdo de cada tela
+3. **Novas rotas raiz** (`fornecedores.tsx`, `fornecedores.pedido.tsx`, `categorias.tsx`, `produtos.tsx`, `estoque.tsx`)
+   - Mesmo conteúdo das versões `admin.*` atuais, apenas com `createFileRoute` apontando para o novo path.
 
-### Fornecedores — Cadastro (`/admin/fornecedores`)
-- Ações: Template · Importar · Novo Fornecedor.
-- Tabela: Razão social, CNPJ, Contato, Cidade/UF, Categoria, Status.
-- Filtros: busca + status. Linhas mock (Vitali Tecidos, Como Silks, Northampton Leather, etc.).
+4. **`CadastroActions`, `DataTable`**: sem alterações.
 
-### Fornecedores — Pedido (`/admin/fornecedores/pedidos`)
-- Ações: Template · Importar · Novo Pedido.
-- Tabela: Nº do pedido, Fornecedor, Emissão, Previsão, Itens, Total, Status (Rascunho, Enviado, Recebido).
-- Card lateral com resumo (Em aberto, Recebidos no mês).
+5. **Links internos**: atualizar qualquer `to="/admin/..."` (em `admin.index.tsx` → agora `dashboard.tsx`, e no header do `AdminShell`) para as novas URLs.
 
-### Loja — Categorias (`/admin/categorias`)
-- Ações: Template · Importar · Nova Categoria.
-- Lista hierárquica (Ternos → Marinho/Grafite; Camisaria; Calçados; Acessórios) com contagem de produtos.
+### Fora de escopo
 
-### Loja — Produtos (`/admin/produtos`)
-- Ações: Template · Importar · Novo Produto.
-- Tabela: Imagem, SKU, Nome, Categoria, Preço, Estoque, Status. Reutiliza mock em `src/data/products.ts` acrescentando SKU/estoque.
-
-### Loja — Estoque (`/admin/estoque`)
-- Ações: Template · Importar · Nova Movimentação.
-- Tabela: SKU, Produto, Depósito, Saldo, Reservado, Disponível, Última movimentação.
-- Cards no topo: Total em peças, SKUs críticos, Rupturas.
-
-## Design tokens
-Reaproveita variáveis já em `src/styles.css` (marinho, dourado, marfim). Nenhum token novo; apenas classes utilitárias.
-
-## SEO / head()
-Cada rota com `head()` próprio (title/description) — ex.: "Fornecedores — Omega Suits Admin".
-
-## Detalhes técnicos
-- Layout `admin.tsx` usa `useEffect` + `isAuthenticated()` (mesmo padrão do `dashboard.tsx`) e renderiza `<Outlet />`.
-- `CadastroActions` recebe props `onTemplate`, `onImport`, `onNew` e labels opcionais.
-- Formulários "Novo …" usam `Sheet`/`Dialog` do shadcn (já disponível).
-- Sem alteração no header público do site; a área admin não aparece no menu principal — acesso via `/admin` a partir do dashboard (adicionar link "Gerenciar loja" no dashboard).
-
-## Fora do escopo
-- Sem persistência real, sem CRUD funcional, sem validação server-side, sem paginação real. Estado local com `useState` apenas.
+- Não altero `/login` nem `mock-auth.ts` (ficam intocados, apenas não são mais usados como gate).
+- Não altero as rotas públicas do site (`/`, `/ternos`, etc.).
