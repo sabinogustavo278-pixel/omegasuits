@@ -1,6 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Truck, ClipboardList, LayoutGrid, Package, Warehouse, LayoutDashboard, Menu, X } from "lucide-react";
+import {
+  Truck,
+  ClipboardList,
+  LayoutGrid,
+  Package,
+  Warehouse,
+  LayoutDashboard,
+  Menu,
+  X,
+  Users,
+  UserCog,
+  ShieldCheck,
+  KeyRound,
+} from "lucide-react";
+import { RoleSwitcher } from "./RoleSwitcher";
+import { RoleGate } from "./RoleGate";
+import { canAccess, useActiveRole } from "@/lib/mock-roles";
 
 const groups = [
   {
@@ -16,6 +32,15 @@ const groups = [
       { to: "/categorias", label: "Categorias", icon: LayoutGrid },
       { to: "/produtos", label: "Produtos", icon: Package },
       { to: "/estoque", label: "Estoque", icon: Warehouse },
+      { to: "/clientes", label: "Clientes", icon: Users },
+    ],
+  },
+  {
+    label: "Usuários",
+    items: [
+      { to: "/usuarios", label: "Usuários", icon: UserCog },
+      { to: "/perfis", label: "Perfis", icon: ShieldCheck },
+      { to: "/acessos", label: "Acessos", icon: KeyRound },
     ],
   },
 ] as const;
@@ -33,6 +58,7 @@ export function AdminShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const role = useActiveRole();
 
   return (
     <div className="flex min-h-screen bg-secondary/40 text-foreground">
@@ -58,7 +84,7 @@ export function AdminShell({
           </button>
         </div>
 
-        <nav className="mt-4 px-4">
+        <nav className="mt-4 px-4 pb-10">
           <Link
             to="/dashboard"
             className={`mb-6 flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.28em] transition-colors ${
@@ -79,6 +105,7 @@ export function AdminShell({
               <ul className="mt-3 space-y-1">
                 {group.items.map((item) => {
                   const active = pathname === item.to;
+                  const allowed = canAccess(item.to, role);
                   const Icon = item.icon;
                   return (
                     <li key={item.to}>
@@ -89,10 +116,15 @@ export function AdminShell({
                           active
                             ? "border-accent bg-white/5 text-accent"
                             : "border-transparent text-primary-foreground/75 hover:border-primary-foreground/40 hover:text-primary-foreground"
-                        }`}
+                        } ${allowed ? "" : "opacity-40"}`}
                       >
                         <Icon className="h-4 w-4" strokeWidth={1.25} />
-                        {item.label}
+                        <span className="flex-1">{item.label}</span>
+                        {!allowed ? (
+                          <span className="border border-primary-foreground/30 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.25em] text-primary-foreground/60">
+                            Restrito
+                          </span>
+                        ) : null}
                       </Link>
                     </li>
                   );
@@ -123,17 +155,22 @@ export function AdminShell({
               <h1 className="font-serif text-2xl text-foreground md:text-3xl">{title}</h1>
             </div>
           </div>
-          <Link
-            to="/"
-            className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground md:inline"
-          >
-            ← Ir para a loja
-          </Link>
+          <div className="flex items-center gap-4">
+            <RoleSwitcher />
+            <Link
+              to="/"
+              className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground md:inline"
+            >
+              ← Ir para a loja
+            </Link>
+          </div>
         </header>
 
         <main className="flex-1 px-6 py-10 md:px-10">
-          {actions ? <div className="mb-8">{actions}</div> : null}
-          {children}
+          <RoleGate path={pathname}>
+            {actions ? <div className="mb-8">{actions}</div> : null}
+            {children}
+          </RoleGate>
         </main>
       </div>
     </div>

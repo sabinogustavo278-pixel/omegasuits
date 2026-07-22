@@ -9,19 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as TernosRouteImport } from './routes/ternos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as PerfisRouteImport } from './routes/perfis'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
+import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores.pedido'
 
+const UsuariosRoute = UsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TernosRoute = TernosRouteImport.update({
   id: '/ternos',
   path: '/ternos',
@@ -30,6 +39,11 @@ const TernosRoute = TernosRouteImport.update({
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfisRoute = PerfisRouteImport.update({
+  id: '/perfis',
+  path: '/perfis',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -52,6 +66,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
@@ -65,6 +84,11 @@ const CamisariaRoute = CamisariaRouteImport.update({
 const CalcadosRoute = CalcadosRouteImport.update({
   id: '/calcados',
   path: '/calcados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcessosRoute = AcessosRouteImport.update({
+  id: '/acessos',
+  path: '/acessos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcessoriosRoute = AcessoriosRouteImport.update({
@@ -86,44 +110,56 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
+  '/acessos': typeof AcessosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/clientes': typeof ClientesRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
+  '/acessos': typeof AcessosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/clientes': typeof ClientesRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/acessorios': typeof AcessoriosRoute
+  '/acessos': typeof AcessosRoute
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/clientes': typeof ClientesRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
   '/login': typeof LoginRoute
+  '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
+  '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
 }
 export interface FileRouteTypes {
@@ -131,62 +167,85 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acessorios'
+    | '/acessos'
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/clientes'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/perfis'
     | '/produtos'
     | '/ternos'
+    | '/usuarios'
     | '/fornecedores/pedido'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/acessorios'
+    | '/acessos'
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/clientes'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/perfis'
     | '/produtos'
     | '/ternos'
+    | '/usuarios'
     | '/fornecedores/pedido'
   id:
     | '__root__'
     | '/'
     | '/acessorios'
+    | '/acessos'
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/clientes'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/perfis'
     | '/produtos'
     | '/ternos'
+    | '/usuarios'
     | '/fornecedores/pedido'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcessoriosRoute: typeof AcessoriosRoute
+  AcessosRoute: typeof AcessosRoute
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
   CategoriasRoute: typeof CategoriasRoute
+  ClientesRoute: typeof ClientesRoute
   DashboardRoute: typeof DashboardRoute
   EstoqueRoute: typeof EstoqueRoute
   FornecedoresRoute: typeof FornecedoresRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PerfisRoute: typeof PerfisRoute
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
+  UsuariosRoute: typeof UsuariosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/usuarios': {
+      id: '/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ternos': {
       id: '/ternos'
       path: '/ternos'
@@ -199,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/produtos'
       preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfis': {
+      id: '/perfis'
+      path: '/perfis'
+      fullPath: '/perfis'
+      preLoaderRoute: typeof PerfisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -229,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categorias': {
       id: '/categorias'
       path: '/categorias'
@@ -248,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/calcados'
       fullPath: '/calcados'
       preLoaderRoute: typeof CalcadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acessos': {
+      id: '/acessos'
+      path: '/acessos'
+      fullPath: '/acessos'
+      preLoaderRoute: typeof AcessosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/acessorios': {
@@ -289,26 +369,20 @@ const FornecedoresRouteWithChildren = FornecedoresRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
+  AcessosRoute: AcessosRoute,
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
   CategoriasRoute: CategoriasRoute,
+  ClientesRoute: ClientesRoute,
   DashboardRoute: DashboardRoute,
   EstoqueRoute: EstoqueRoute,
   FornecedoresRoute: FornecedoresRouteWithChildren,
   LoginRoute: LoginRoute,
+  PerfisRoute: PerfisRoute,
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
+  UsuariosRoute: UsuariosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

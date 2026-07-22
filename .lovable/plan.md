@@ -1,52 +1,80 @@
-## Correções na área de gerenciamento
+## Objetivo
 
-Remover auth guard e reorganizar as rotas para o nível raiz, sem prefixo `/admin`.
+Adicionar a área de Clientes, a seção de Gerenciamento de Usuários (Usuários, Perfis, Matriz de Acesso) e um controle de acesso mock por perfil aplicado às rotas do painel. Padronizar as telas de cadastro existentes conforme a base de conhecimento (Cormorant + Inter, marinho/carvão/marfim/dourado, botões Template · Importar · Novo).
 
-### Novas rotas (nível raiz)
+## Novas rotas
 
 ```
 src/routes/
-  dashboard.tsx              -> /dashboard       (já existe, será ajustado)
-  fornecedores.tsx           -> /fornecedores    (cadastro)
-  fornecedores.pedido.tsx    -> /fornecedores/pedido
-  categorias.tsx             -> /categorias
-  produtos.tsx               -> /produtos
-  estoque.tsx                -> /estoque
+  clientes.tsx                 -> /clientes            (cadastro)
+  usuarios.tsx                 -> /usuarios            (cadastro de usuários)
+  perfis.tsx                   -> /perfis              (Admin / Gerente / Usuário)
+  acessos.tsx                  -> /acessos             (matriz perfil × rota)
 ```
 
-Observação: o plano anterior mencionava só `/fornecedores`, `/fornecedores/pedido`, `/categorias` e `/produtos`. Mantenho `/estoque` porque a tela já existe e faz parte do grupo Loja — se preferir remover também, é só sinalizar.
+Sidebar do `AdminShell` ganha um novo grupo **Usuários** (Usuários, Perfis, Acessos) e o grupo **Loja** recebe **Clientes**.
 
-### Arquivos a excluir
+## Controle de acesso mock (por perfil)
 
-- `src/routes/admin.tsx`
-- `src/routes/admin.index.tsx`
-- `src/routes/admin.fornecedores.tsx`
-- `src/routes/admin.fornecedores.pedidos.tsx`
-- `src/routes/admin.categorias.tsx`
-- `src/routes/admin.produtos.tsx`
-- `src/routes/admin.estoque.tsx`
+- Novo módulo `src/lib/mock-roles.ts`: tipo `Role = 'admin' | 'gerente' | 'usuario'`, matriz padrão rota→perfis, helpers `getActiveRole()`, `setActiveRole()`, `canAccess(path)`, `useActiveRole()` (hook com evento custom para re-render).
+- Seletor de perfil no header do `AdminShell` (dropdown discreto ao lado do link "Ir para a loja"), grava em `localStorage`.
+- Wrapper `RoleGate` usado dentro do `AdminShell`: se `canAccess(pathname) === false`, renderiza tela "Acesso restrito" com o perfil atual e sugestão de troca — não redireciona (mantém navegação livre pela URL, apenas oculta conteúdo).
+- Itens da sidebar que o perfil ativo não pode acessar aparecem com opacidade reduzida e badge "restrito".
 
-### Ajustes de código
+### Matriz padrão
 
-1. **`AdminShell.tsx`**
-   - Remover `useEffect` + `isAuthenticated()` + redirect para `/login`. Sem auth guard.
-   - Remover botão "Sair" (ou transformar em link para `/`, sem `signOut`).
-   - Atualizar `groups` para novos caminhos: `/fornecedores`, `/fornecedores/pedido`, `/categorias`, `/produtos`, `/estoque`.
-   - Link do logo passa a apontar para `/dashboard` (nova "visão geral").
+| Rota | Admin | Gerente | Usuário |
+|---|---|---|---|
+| /dashboard | ✓ | ✓ | ✓ |
+| /fornecedores | ✓ | ✓ | — |
+| /fornecedores/pedido | ✓ | ✓ | — |
+| /categorias | ✓ | ✓ | — |
+| /produtos | ✓ | ✓ | ✓ (leitura) |
+| /estoque | ✓ | ✓ | ✓ (leitura) |
+| /clientes | ✓ | ✓ | ✓ (leitura) |
+| /usuarios | ✓ | — | — |
+| /perfis | ✓ | — | — |
+| /acessos | ✓ | — | — |
 
-2. **`dashboard.tsx`**
-   - Remover `useEffect` + `isAuthenticated()` — acesso direto pela URL.
-   - Remover botão "Sair".
-   - Renderizar via `AdminShell` para virar a "visão geral" do painel (atalhos + KPIs que estavam em `admin.index.tsx`), preservando o conteúdo atual de "Minha conta" abaixo — ou substituir totalmente pela visão geral. **Decisão adotada**: transformar `/dashboard` na visão geral do painel (padrão das outras telas admin, com sidebar). O conteúdo antigo "Minha conta / Pedidos recentes / Wishlist" sai. Se preferir manter o conteúdo de conta, sinalize.
+A "leitura" é indicada por badge na página e ocultando `CadastroActions`; o dado permanece o mesmo.
 
-3. **Novas rotas raiz** (`fornecedores.tsx`, `fornecedores.pedido.tsx`, `categorias.tsx`, `produtos.tsx`, `estoque.tsx`)
-   - Mesmo conteúdo das versões `admin.*` atuais, apenas com `createFileRoute` apontando para o novo path.
+## Conteúdo das novas telas
 
-4. **`CadastroActions`, `DataTable`**: sem alterações.
+**/clientes** — `AdminShell` + `CadastroActions` (Template · Importar · Novo) + `DataTable` com colunas: Cliente, Contato, Cidade/UF, Últimas compras, Status. Mock com ~6 clientes premium.
 
-5. **Links internos**: atualizar qualquer `to="/admin/..."` (em `admin.index.tsx` → agora `dashboard.tsx`, e no header do `AdminShell`) para as novas URLs.
+**/usuarios** — `CadastroActions` + tabela: Nome, E-mail, Perfil, Último acesso, Status. Inclui usuário de teste `teste@omegasuits.com` (perfil Administrador, senha mock exibida como `omega#2026`).
 
-### Fora de escopo
+**/perfis** — cards dos três perfis (Administrador, Gerente, Usuário) com descrição, nº de usuários e lista de permissões-chave. `CadastroActions` reduzido (Template · Novo) para criar perfis extras (mock).
 
-- Não altero `/login` nem `mock-auth.ts` (ficam intocados, apenas não são mais usados como gate).
-- Não altero as rotas públicas do site (`/`, `/ternos`, etc.).
+**/acessos** — matriz perfil × rota (checkboxes desabilitados na visualização mock) refletindo a matriz padrão. Legenda explicando "leitura" vs "total".
+
+## Padronização das páginas existentes
+
+Passagem pelas telas de cadastro (`/fornecedores`, `/fornecedores/pedido`, `/categorias`, `/produtos`, `/estoque`) confirmando:
+- Uso de `AdminShell` com `eyebrow` + título Cormorant.
+- `CadastroActions` com a ordem exata Template · Importar · Novo.
+- `DataTable` com `StatusPill` para status.
+- Nenhum uso de cores hardcoded — apenas tokens (`bg-charcoal`, `text-accent`, `text-muted-foreground`, etc.).
+- Ajustes pontuais onde a ordem/estilo divergir.
+
+## Arquivos criados / editados
+
+Criados:
+- `src/lib/mock-roles.ts`
+- `src/components/admin/RoleSwitcher.tsx`
+- `src/components/admin/RoleGate.tsx`
+- `src/routes/clientes.tsx`
+- `src/routes/usuarios.tsx`
+- `src/routes/perfis.tsx`
+- `src/routes/acessos.tsx`
+
+Editados:
+- `src/components/admin/AdminShell.tsx` (novo grupo Usuários, item Clientes, RoleSwitcher no header, RoleGate envolvendo `children`, badges "restrito" nos itens bloqueados).
+- Telas de cadastro existentes: revisão de padronização (apenas ajustes cosméticos se necessário).
+- `src/routes/dashboard.tsx`: adiciona atalhos para Clientes e Usuários no bloco de "Gerenciar loja".
+
+## Fora do escopo
+
+- Autenticação real / reativação de `/login` como gate.
+- Persistência de usuários/perfis/matriz (tudo mock em memória + localStorage do perfil ativo).
+- Fluxos CRUD reais nos modais de "Novo".
