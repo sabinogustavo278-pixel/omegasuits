@@ -19,6 +19,10 @@ const shortcuts = [
   { to: "/categorias", label: "Categorias", desc: "Estrutura de coleções e famílias." },
   { to: "/produtos", label: "Produtos", desc: "Ficha, preço e disponibilidade." },
   { to: "/estoque", label: "Estoque", desc: "Saldos por depósito e movimentações." },
+  { to: "/clientes", label: "Clientes", desc: "Base de clientes e histórico de compras." },
+  { to: "/usuarios", label: "Usuários", desc: "Contas de acesso ao painel." },
+  { to: "/perfis", label: "Perfis", desc: "Administrador, Gerente e Usuário." },
+  { to: "/acessos", label: "Acessos", desc: "Matriz de permissões por rota." },
 ] as const;
 
 function DashboardPage() {
