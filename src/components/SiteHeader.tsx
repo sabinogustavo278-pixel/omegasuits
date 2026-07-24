@@ -46,7 +46,7 @@ export function SiteHeader() {
             ))}
           </nav>
           <Link
-            to="/login"
+            to="/conta"
             aria-label="Conta"
             className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >

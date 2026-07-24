@@ -23,6 +23,7 @@ const shortcuts = [
   { to: "/usuarios", label: "Usuários", desc: "Contas de acesso ao painel." },
   { to: "/perfis", label: "Perfis", desc: "Administrador, Gerente e Usuário." },
   { to: "/acessos", label: "Acessos", desc: "Matriz de permissões por rota." },
+  { to: "/conta", label: "Minha conta", desc: "Avatar e alteração de senha." },
 ] as const;
 
 function DashboardPage() {
