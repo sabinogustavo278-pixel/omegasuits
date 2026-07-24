@@ -1,80 +1,68 @@
-## Objetivo
 
-Adicionar a área de Clientes, a seção de Gerenciamento de Usuários (Usuários, Perfis, Matriz de Acesso) e um controle de acesso mock por perfil aplicado às rotas do painel. Padronizar as telas de cadastro existentes conforme a base de conhecimento (Cormorant + Inter, marinho/carvão/marfim/dourado, botões Template · Importar · Novo).
+## 1. Usuário de teste "Gustavo"
 
-## Novas rotas
+Em `src/routes/usuarios.tsx`, adicionar linha no array `rows`:
+- Nome: Gustavo · E-mail: `gustavo@omegasuits.com` · Perfil: `usuario` · Senha: `278` · Status: Ativo.
 
-```
-src/routes/
-  clientes.tsx                 -> /clientes            (cadastro)
-  usuarios.tsx                 -> /usuarios            (cadastro de usuários)
-  perfis.tsx                   -> /perfis              (Admin / Gerente / Usuário)
-  acessos.tsx                  -> /acessos             (matriz perfil × rota)
-```
+Atualizar o bloco de credenciais de teste no topo da página para listar também Gustavo (perfil Usuário, senha 278) além do administrador atual.
 
-Sidebar do `AdminShell` ganha um novo grupo **Usuários** (Usuários, Perfis, Acessos) e o grupo **Loja** recebe **Clientes**.
+## 2. Configuração de perfil do usuário logado
 
-## Controle de acesso mock (por perfil)
+Nova rota `src/routes/conta.tsx` (menu já indica "Conta" no header):
+- Card "Avatar": upload de imagem (input file) com preview, tratamento client-side (canvas resize p/ ~400px, compressão JPEG ~0.8) e persistência mock em `localStorage` (`omega_avatar`). Segue diretriz de "upload de imagens tratadas".
+- Card "Alterar senha": campos senha atual, nova senha, confirmar; validação mock, feedback de sucesso.
+- Card "Dados básicos": nome + e-mail (somente leitura por enquanto, valores do usuário mock ativo).
+- Usa `AdminShell` para manter navegação/perfil ativo.
+- Link "Minha conta" adicionado ao `SiteHeader` (ícone usuário) e atalho no `dashboard.tsx`.
 
-- Novo módulo `src/lib/mock-roles.ts`: tipo `Role = 'admin' | 'gerente' | 'usuario'`, matriz padrão rota→perfis, helpers `getActiveRole()`, `setActiveRole()`, `canAccess(path)`, `useActiveRole()` (hook com evento custom para re-render).
-- Seletor de perfil no header do `AdminShell` (dropdown discreto ao lado do link "Ir para a loja"), grava em `localStorage`.
-- Wrapper `RoleGate` usado dentro do `AdminShell`: se `canAccess(pathname) === false`, renderiza tela "Acesso restrito" com o perfil atual e sugestão de troca — não redireciona (mantém navegação livre pela URL, apenas oculta conteúdo).
-- Itens da sidebar que o perfil ativo não pode acessar aparecem com opacidade reduzida e badge "restrito".
+Novo helper `src/lib/mock-account.ts` com getters/setters de avatar e senha em `localStorage`.
 
-### Matriz padrão
+## 3. Botão "Loja" na seção Nossas Coleções (landing)
 
-| Rota | Admin | Gerente | Usuário |
-|---|---|---|---|
-| /dashboard | ✓ | ✓ | ✓ |
-| /fornecedores | ✓ | ✓ | — |
-| /fornecedores/pedido | ✓ | ✓ | — |
-| /categorias | ✓ | ✓ | — |
-| /produtos | ✓ | ✓ | ✓ (leitura) |
-| /estoque | ✓ | ✓ | ✓ (leitura) |
-| /clientes | ✓ | ✓ | ✓ (leitura) |
-| /usuarios | ✓ | — | — |
-| /perfis | ✓ | — | — |
-| /acessos | ✓ | — | — |
+Em `src/routes/index.tsx`, envolver o grid de produtos numa seção com kicker "Coleção" + título "Nossas Coleções" e adicionar CTA `Link` para `/ternos` (rota principal da loja) com o mesmo estilo dourado do Hero: rótulo "Visitar a loja".
 
-A "leitura" é indicada por badge na página e ocultando `CadastroActions`; o dado permanece o mesmo.
+## 4. Novos produtos mock
 
-## Conteúdo das novas telas
+Adicionar em `src/data/products.ts` (11 novos itens) reutilizando as imagens existentes por categoria (não gerar novas imagens — mocks visuais):
 
-**/clientes** — `AdminShell` + `CadastroActions` (Template · Importar · Novo) + `DataTable` com colunas: Cliente, Contato, Cidade/UF, Últimas compras, Status. Mock com ~6 clientes premium.
+Ternos (imagem `product-suit.jpg`):
+- Terno Transpassado — Azul Marinho
+- Terno Transpassado — Preto
+- Terno Caimento Italiano com Colete — Preto
+- Terno Caimento Italiano com Colete — Azul Marinho
+- Terno Caimento Italiano com Colete — Cinza Claro
 
-**/usuarios** — `CadastroActions` + tabela: Nome, E-mail, Perfil, Último acesso, Status. Inclui usuário de teste `teste@omegasuits.com` (perfil Administrador, senha mock exibida como `omega#2026`).
+Calçados (imagem `product-oxford.jpg`):
+- Sapato Loafer — Preto
+- Sapato Oxford — Marrom Café
 
-**/perfis** — cards dos três perfis (Administrador, Gerente, Usuário) com descrição, nº de usuários e lista de permissões-chave. `CadastroActions` reduzido (Template · Novo) para criar perfis extras (mock).
+Acessórios (imagem `product-tie.jpg`):
+- Gravata de Seda com detalhes — Amarela
+- Gravata de Seda com detalhes — Marrom
+- Gravata de Seda com detalhes — Verde
+- Gravata de Seda com detalhes — Vermelha
 
-**/acessos** — matriz perfil × rota (checkboxes desabilitados na visualização mock) refletindo a matriz padrão. Legenda explicando "leitura" vs "total".
+Cada item recebe `id` slug, `price` coerente com a linha, `tagline` curta. Aparecem automaticamente nas rotas `/ternos`, `/calcados`, `/acessorios` e no grid da home.
 
-## Padronização das páginas existentes
+Observação: se preferir imagens dedicadas por variação (cor), posso gerar depois — não incluído aqui para manter escopo.
 
-Passagem pelas telas de cadastro (`/fornecedores`, `/fornecedores/pedido`, `/categorias`, `/produtos`, `/estoque`) confirmando:
-- Uso de `AdminShell` com `eyebrow` + título Cormorant.
-- `CadastroActions` com a ordem exata Template · Importar · Novo.
-- `DataTable` com `StatusPill` para status.
-- Nenhum uso de cores hardcoded — apenas tokens (`bg-charcoal`, `text-accent`, `text-muted-foreground`, etc.).
-- Ajustes pontuais onde a ordem/estilo divergir.
+## 5. Padronização (base de conhecimento)
 
-## Arquivos criados / editados
+Revisão das telas de gestão para garantir:
+- **Cabeçalhos ordenáveis**: `DataTable` passa a aceitar `columns` como `{ label, sortKey? }[]` e renderiza botões de ordenação (asc/desc/none) com ícone. Aplicado em: `fornecedores`, `fornecedores.pedido`, `categorias`, `produtos`, `estoque`, `clientes`, `usuarios`.
+- **Filtros**: cada página com tabela mantém input de busca + select de filtro (já presentes na maioria); acrescentar onde estiver faltando (`fornecedores.pedido`, `categorias`, `estoque`).
+- **Botões Template · Importar · Novo**: verificar presença em todas as telas de cadastro (já padronizado via `CadastroActions`); confirmar em `clientes`, `usuarios`.
+- **Upload de imagens em telas de cadastro**: adicionar campo de upload tratado (resize + compressão client-side, mock de bucket via `localStorage`/preview) em modais/futuros formulários — nesta entrega, o `CadastroActions` recebe um dialog "Novo" com campo de imagem tratada quando a entidade é visual (Produto, Categoria, Cliente, Usuário). Persistência é mock, mas o fluxo de tratamento fica pronto para migração a bucket real.
 
-Criados:
-- `src/lib/mock-roles.ts`
-- `src/components/admin/RoleSwitcher.tsx`
-- `src/components/admin/RoleGate.tsx`
-- `src/routes/clientes.tsx`
-- `src/routes/usuarios.tsx`
-- `src/routes/perfis.tsx`
-- `src/routes/acessos.tsx`
+## Detalhes técnicos
 
-Editados:
-- `src/components/admin/AdminShell.tsx` (novo grupo Usuários, item Clientes, RoleSwitcher no header, RoleGate envolvendo `children`, badges "restrito" nos itens bloqueados).
-- Telas de cadastro existentes: revisão de padronização (apenas ajustes cosméticos se necessário).
-- `src/routes/dashboard.tsx`: adiciona atalhos para Clientes e Usuários no bloco de "Gerenciar loja".
+- `DataTable` ordenação: estado local via `useState`; comparador genérico string/number.
+- Upload tratado: helper `src/lib/image-processing.ts` — lê File, desenha em canvas com max 800px, exporta `toDataURL('image/jpeg', 0.8)`.
+- Nenhuma nova dependência npm.
+- Sem backend: seguem todos mocks; Cloud não é ativado nesta entrega.
 
 ## Fora do escopo
 
-- Autenticação real / reativação de `/login` como gate.
-- Persistência de usuários/perfis/matriz (tudo mock em memória + localStorage do perfil ativo).
-- Fluxos CRUD reais nos modais de "Novo".
+- Geração de novas imagens por cor de produto.
+- Autenticação real / persistência de usuários em banco.
+- Bucket real de armazenamento (pronto para plugar depois).

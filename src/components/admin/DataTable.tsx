@@ -1,22 +1,58 @@
 import type { ReactNode } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import type { SortState } from "@/hooks/use-table-sort";
+
+export interface Column {
+  label: string;
+  sortKey?: string;
+  align?: "left" | "right" | "center";
+}
 
 export function DataTable({
   columns,
+  sort,
+  onSort,
   children,
 }: {
-  columns: string[];
+  columns: Array<Column | string>;
+  sort?: SortState;
+  onSort?: (key: string) => void;
   children: ReactNode;
 }) {
+  const cols: Column[] = columns.map((c) => (typeof c === "string" ? { label: c } : c));
   return (
     <div className="overflow-x-auto border border-border bg-background">
       <table className="w-full min-w-[720px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-border bg-secondary/60 text-left text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-            {columns.map((c) => (
-              <th key={c} className="px-6 py-4 font-normal">
-                {c}
-              </th>
-            ))}
+            {cols.map((c, i) => {
+              const sortable = !!c.sortKey && !!onSort;
+              const active = sortable && sort?.key === c.sortKey;
+              const Icon = active ? (sort!.dir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+              return (
+                <th
+                  key={`${c.label}-${i}`}
+                  className={`px-6 py-4 font-normal ${
+                    c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""
+                  }`}
+                >
+                  {sortable ? (
+                    <button
+                      type="button"
+                      onClick={() => onSort!(c.sortKey!)}
+                      className={`inline-flex items-center gap-2 transition-colors ${
+                        active ? "text-accent" : "hover:text-foreground"
+                      }`}
+                    >
+                      <span>{c.label}</span>
+                      <Icon className="h-3 w-3" strokeWidth={1.5} />
+                    </button>
+                  ) : (
+                    <span>{c.label}</span>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody className="divide-y divide-border">{children}</tbody>
@@ -55,9 +91,7 @@ export function StatCard({
 }) {
   return (
     <div className="border border-border bg-background p-6">
-      <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">{label}</p>
       <p className="mt-3 font-serif text-4xl text-foreground">{value}</p>
       {hint ? (
         <p className="mt-2 text-[11px] uppercase tracking-[0.28em] text-accent">{hint}</p>

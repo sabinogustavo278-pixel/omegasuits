@@ -17,6 +17,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
@@ -64,6 +65,11 @@ const EstoqueRoute = EstoqueRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientesRoute = ClientesRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
   '/clientes': typeof ClientesRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
   '/clientes': typeof ClientesRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
   '/clientes': typeof ClientesRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRouteWithChildren
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/camisaria'
     | '/categorias'
     | '/clientes'
+    | '/conta'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/camisaria'
     | '/categorias'
     | '/clientes'
+    | '/conta'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/camisaria'
     | '/categorias'
     | '/clientes'
+    | '/conta'
     | '/dashboard'
     | '/estoque'
     | '/fornecedores'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   CamisariaRoute: typeof CamisariaRoute
   CategoriasRoute: typeof CategoriasRoute
   ClientesRoute: typeof ClientesRoute
+  ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
   EstoqueRoute: typeof EstoqueRoute
   FornecedoresRoute: typeof FornecedoresRouteWithChildren
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes': {
@@ -374,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   CamisariaRoute: CamisariaRoute,
   CategoriasRoute: CategoriasRoute,
   ClientesRoute: ClientesRoute,
+  ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
   EstoqueRoute: EstoqueRoute,
   FornecedoresRoute: FornecedoresRouteWithChildren,
@@ -386,13 +407,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

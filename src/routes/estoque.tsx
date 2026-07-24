@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
+import { useTableSort } from "@/hooks/use-table-sort";
 
 export const Route = createFileRoute("/estoque")({
   head: () => ({
@@ -24,6 +26,22 @@ const rows = [
 ];
 
 function EstoquePage() {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("todos");
+  const filtered = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          return r.sku.toLowerCase().includes(q) || r.produto.toLowerCase().includes(q);
+        }
+        return true;
+      }),
+    [search, status],
+  );
+  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "sku", dir: "asc" });
+
   return (
     <AdminShell
       eyebrow="Loja"
@@ -42,8 +60,41 @@ function EstoquePage() {
         <StatCard label="Rupturas" value="1" hint="Ação imediata" />
       </div>
 
-      <DataTable columns={["SKU", "Produto", "Depósito", "Saldo", "Reservado", "Disponível", "Última mov.", "Status"]}>
-        {rows.map((r) => (
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por SKU ou produto"
+          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
+        />
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
+        >
+          <option value="todos">Todos os status</option>
+          <option value="ok">OK</option>
+          <option value="crítico">Crítico</option>
+          <option value="ruptura">Ruptura</option>
+        </select>
+      </div>
+
+      <DataTable
+        sort={sort}
+        onSort={toggle}
+        columns={[
+          { label: "SKU", sortKey: "sku" },
+          { label: "Produto", sortKey: "produto" },
+          { label: "Depósito", sortKey: "deposito" },
+          { label: "Saldo", sortKey: "saldo" },
+          { label: "Reservado", sortKey: "reservado" },
+          { label: "Disponível", sortKey: "disp" },
+          { label: "Última mov.", sortKey: "ult" },
+          { label: "Status", sortKey: "status" },
+        ]}
+      >
+        {visible.map((r) => (
           <tr key={r.sku} className="hover:bg-secondary/40">
             <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{r.sku}</td>
             <td className="px-6 py-4 font-serif text-base text-foreground">{r.produto}</td>

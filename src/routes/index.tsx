@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroSection } from "@/components/HeroSection";
@@ -17,6 +17,24 @@ function Home() {
         <HeroSection />
 
         <section className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
+          <div className="mb-14 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.4em] text-accent">Coleção</p>
+              <h2 className="mt-4 font-serif text-4xl text-foreground md:text-5xl">
+                Nossas Coleções
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                Uma seleção do ateliê: ternos sob medida, camisaria fina, calçados Goodyear e
+                acessórios em seda pura.
+              </p>
+            </div>
+            <Link
+              to="/ternos"
+              className="inline-flex items-center justify-center border border-accent bg-accent px-8 py-4 text-[11px] uppercase tracking-[0.3em] text-charcoal transition-colors hover:bg-transparent hover:text-accent"
+            >
+              Visitar a loja
+            </Link>
+          </div>
           <div className="grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((p) => (
               <ProductCard key={p.id} product={p} />

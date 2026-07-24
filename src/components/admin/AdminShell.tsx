@@ -17,6 +17,8 @@ import {
 import { RoleSwitcher } from "./RoleSwitcher";
 import { RoleGate } from "./RoleGate";
 import { canAccess, useActiveRole } from "@/lib/mock-roles";
+import { useAvatar } from "@/lib/mock-account";
+import { UserCircle2 } from "lucide-react";
 
 const groups = [
   {
@@ -59,6 +61,7 @@ export function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const role = useActiveRole();
+  const avatar = useAvatar();
 
   return (
     <div className="flex min-h-screen bg-secondary/40 text-foreground">
@@ -157,6 +160,18 @@ export function AdminShell({
           </div>
           <div className="flex items-center gap-4">
             <RoleSwitcher />
+            <Link
+              to="/conta"
+              className="inline-flex items-center gap-2 border border-border bg-background px-3 py-2 text-[10px] uppercase tracking-[0.28em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+              aria-label="Minha conta"
+            >
+              {avatar ? (
+                <img src={avatar} alt="Avatar" className="h-5 w-5 rounded-full object-cover" />
+              ) : (
+                <UserCircle2 className="h-5 w-5" strokeWidth={1.25} />
+              )}
+              <span className="hidden sm:inline">Minha conta</span>
+            </Link>
             <Link
               to="/"
               className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground hover:text-foreground md:inline"
