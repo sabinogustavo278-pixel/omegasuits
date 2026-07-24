@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
+import { useTableSort } from "@/hooks/use-table-sort";
 import { formatPrice } from "@/data/products";
 
 export const Route = createFileRoute("/fornecedores/pedido")({
@@ -23,6 +25,22 @@ const rows = [
 ];
 
 function PedidosPage() {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("todos");
+  const filtered = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          return r.n.toLowerCase().includes(q) || r.forn.toLowerCase().includes(q);
+        }
+        return true;
+      }),
+    [search, status],
+  );
+  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "n", dir: "desc" });
+
   return (
     <AdminShell
       eyebrow="Fornecedores"
@@ -41,8 +59,41 @@ function PedidosPage() {
         <StatCard label="Ticket médio" value="R$ 24.500" />
       </div>
 
-      <DataTable columns={["Nº", "Fornecedor", "Emissão", "Previsão", "Itens", "Total", "Status", ""]}>
-        {rows.map((r) => (
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por número ou fornecedor"
+          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
+        />
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
+        >
+          <option value="todos">Todos os status</option>
+          <option value="rascunho">Rascunho</option>
+          <option value="enviado">Enviado</option>
+          <option value="recebido">Recebido</option>
+        </select>
+      </div>
+
+      <DataTable
+        sort={sort}
+        onSort={toggle}
+        columns={[
+          { label: "Nº", sortKey: "n" },
+          { label: "Fornecedor", sortKey: "forn" },
+          { label: "Emissão", sortKey: "emissao" },
+          { label: "Previsão", sortKey: "previsao" },
+          { label: "Itens", sortKey: "itens" },
+          { label: "Total", sortKey: "total" },
+          { label: "Status", sortKey: "status" },
+          "",
+        ]}
+      >
+        {visible.map((r) => (
           <tr key={r.n} className="hover:bg-secondary/40">
             <td className="px-6 py-4 text-[11px] uppercase tracking-[0.25em] text-accent">{r.n}</td>
             <td className="px-6 py-4 font-serif text-base text-foreground">{r.forn}</td>

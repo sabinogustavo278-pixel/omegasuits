@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CadastroActions } from "@/components/admin/CadastroActions";
 import { DataTable, StatusPill } from "@/components/admin/DataTable";
+import { useTableSort } from "@/hooks/use-table-sort";
 import { isReadOnly, useActiveRole } from "@/lib/mock-roles";
 
 export const Route = createFileRoute("/clientes")({
@@ -27,6 +29,22 @@ const rows = [
 function ClientesPage() {
   const role = useActiveRole();
   const readOnly = isReadOnly("/clientes", role);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("todos");
+  const filtered = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          return [r.nome, r.email, r.tel].some((v) => v.toLowerCase().includes(q));
+        }
+        return true;
+      }),
+    [search, status],
+  );
+  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "nome", dir: "asc" });
+
   return (
     <AdminShell
       eyebrow="Loja"
@@ -50,18 +68,36 @@ function ClientesPage() {
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <input
           type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nome, e-mail ou telefone"
           className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
         />
-        <select className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground">
-          <option>Todos os status</option>
-          <option>Ativo</option>
-          <option>Pausado</option>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
+        >
+          <option value="todos">Todos os status</option>
+          <option value="ativo">Ativo</option>
+          <option value="pausado">Pausado</option>
         </select>
       </div>
 
-      <DataTable columns={["Cliente", "Contato", "Cidade/UF", "Última compra", "Total investido", "Status", ""]}>
-        {rows.map((r) => (
+      <DataTable
+        sort={sort}
+        onSort={toggle}
+        columns={[
+          { label: "Cliente", sortKey: "nome" },
+          { label: "Contato", sortKey: "email" },
+          { label: "Cidade/UF", sortKey: "cidade" },
+          { label: "Última compra", sortKey: "ultima" },
+          { label: "Total investido", sortKey: "total" },
+          { label: "Status", sortKey: "status" },
+          "",
+        ]}
+      >
+        {visible.map((r) => (
           <tr key={r.email} className="hover:bg-secondary/40">
             <td className="px-6 py-4 font-serif text-base text-foreground">{r.nome}</td>
             <td className="px-6 py-4 text-muted-foreground">
