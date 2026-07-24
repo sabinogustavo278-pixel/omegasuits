@@ -17,6 +17,8 @@ import {
 import { RoleSwitcher } from "./RoleSwitcher";
 import { RoleGate } from "./RoleGate";
 import { canAccess, useActiveRole } from "@/lib/mock-roles";
+import { useAvatar } from "@/lib/mock-account";
+import { UserCircle2 } from "lucide-react";
 
 const groups = [
   {
