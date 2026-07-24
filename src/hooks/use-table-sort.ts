@@ -6,18 +6,15 @@ export interface SortState {
   dir: SortDir;
 }
 
-export function useTableSort<T extends Record<string, unknown>>(
-  rows: T[],
-  initial?: SortState,
-) {
+export function useTableSort<T>(rows: T[], initial?: SortState) {
   const [sort, setSort] = useState<SortState | undefined>(initial);
 
   const sorted = useMemo(() => {
     if (!sort) return rows;
     const copy = [...rows];
     copy.sort((a, b) => {
-      const av = a[sort.key];
-      const bv = b[sort.key];
+      const av = (a as Record<string, unknown>)[sort.key];
+      const bv = (b as Record<string, unknown>)[sort.key];
       const cmp = compare(av, bv);
       return sort.dir === "asc" ? cmp : -cmp;
     });
