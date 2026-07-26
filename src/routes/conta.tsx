@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { UserCircle2, Upload, Trash2, KeyRound, Check } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { processImageFile } from "@/lib/image-processing";
+import { isAuthenticated } from "@/lib/mock-auth";
 import {
   clearAvatar,
   getPassword,
@@ -19,6 +20,11 @@ export const Route = createFileRoute("/conta")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !isAuthenticated()) {
+      throw redirect({ to: "/login" });
+    }
+  },
   component: ContaPage,
 });
 
