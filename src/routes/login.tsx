@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { signIn } from "@/lib/mock-auth";
+import { getActiveRole } from "@/lib/mock-roles";
 import heroImg from "@/assets/hero-tailoring.jpg";
 
 export const Route = createFileRoute("/login")({
@@ -21,7 +22,12 @@ function LoginPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     signIn();
-    navigate({ to: "/dashboard" });
+    const role = getActiveRole();
+    if (role === "admin" || role === "gerente") {
+      navigate({ to: "/dashboard" });
+    } else {
+      navigate({ to: "/" });
+    }
   }
 
   return (
