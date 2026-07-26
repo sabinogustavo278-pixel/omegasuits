@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { User } from "lucide-react";
+import { User, LogIn } from "lucide-react";
+import { useIsAuthenticated } from "@/lib/mock-auth";
 
 const nav = [
   { to: "/ternos", label: "Ternos" },
@@ -9,6 +10,7 @@ const nav = [
 ] as const;
 
 export function SiteHeader() {
+  const authed = useIsAuthenticated();
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center px-6 py-5 md:px-10">
@@ -45,14 +47,25 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <Link
-            to="/conta"
-            aria-label="Conta"
-            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
-          >
-            <User className="h-4 w-4" strokeWidth={1.25} />
-            <span className="hidden sm:inline">Conta</span>
-          </Link>
+          {authed ? (
+            <Link
+              to="/conta"
+              aria-label="Conta"
+              className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+            >
+              <User className="h-4 w-4" strokeWidth={1.25} />
+              <span className="hidden sm:inline">Conta</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              aria-label="Entrar"
+              className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+            >
+              <LogIn className="h-4 w-4" strokeWidth={1.25} />
+              <span className="hidden sm:inline">Entrar</span>
+            </Link>
+          )}
         </div>
       </div>
       <nav className="flex items-center justify-center gap-6 border-t border-border/40 px-6 py-3 text-[10px] uppercase tracking-[0.28em] text-muted-foreground md:hidden">
