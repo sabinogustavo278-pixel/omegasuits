@@ -100,41 +100,41 @@ export function AdminShell({
             Visão geral
           </Link>
 
-          {groups.map((group) => (
-            <div key={group.label} className="mb-8">
-              <p className="px-4 text-[10px] uppercase tracking-[0.4em] text-accent">
-                {group.label}
-              </p>
-              <ul className="mt-3 space-y-1">
-                {group.items.map((item) => {
-                  const active = pathname === item.to;
-                  const allowed = canAccess(item.to, role);
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.to}>
-                      <Link
-                        to={item.to}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 border-l-2 px-4 py-3 text-sm transition-colors ${
-                          active
-                            ? "border-accent bg-white/5 text-accent"
-                            : "border-transparent text-primary-foreground/75 hover:border-primary-foreground/40 hover:text-primary-foreground"
-                        } ${allowed ? "" : "opacity-40"}`}
-                      >
-                        <Icon className="h-4 w-4" strokeWidth={1.25} />
-                        <span className="flex-1">{item.label}</span>
-                        {!allowed ? (
-                          <span className="border border-primary-foreground/30 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.25em] text-primary-foreground/60">
-                            Restrito
-                          </span>
-                        ) : null}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+          {groups
+            .map((group) => ({
+              ...group,
+              items: group.items.filter((it) => canAccess(it.to, role)),
+            }))
+            .filter((g) => g.items.length > 0)
+            .map((group) => (
+              <div key={group.label} className="mb-8">
+                <p className="px-4 text-[10px] uppercase tracking-[0.4em] text-accent">
+                  {group.label}
+                </p>
+                <ul className="mt-3 space-y-1">
+                  {group.items.map((item) => {
+                    const active = pathname === item.to;
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.to}>
+                        <Link
+                          to={item.to}
+                          onClick={() => setMobileOpen(false)}
+                          className={`flex items-center gap-3 border-l-2 px-4 py-3 text-sm transition-colors ${
+                            active
+                              ? "border-accent bg-white/5 text-accent"
+                              : "border-transparent text-primary-foreground/75 hover:border-primary-foreground/40 hover:text-primary-foreground"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" strokeWidth={1.25} />
+                          <span className="flex-1">{item.label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
         </nav>
       </aside>
 
