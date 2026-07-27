@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { User, LogIn } from "lucide-react";
+import { User, LogIn, ShoppingBag } from "lucide-react";
 import { useIsAuthenticated } from "@/lib/mock-auth";
+import { useCart } from "@/lib/mock-cart";
 
 const nav = [
   { to: "/ternos", label: "Ternos" },
