@@ -183,10 +183,11 @@ function ContaPage() {
 
             <button
               type="submit"
-              className="inline-flex items-center gap-2 border border-foreground bg-foreground px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-background transition-colors hover:bg-transparent hover:text-foreground"
+              disabled={pwLoading}
+              className="inline-flex items-center gap-2 border border-foreground bg-foreground px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-background transition-colors hover:bg-transparent hover:text-foreground disabled:opacity-60"
             >
               <KeyRound className="h-4 w-4" strokeWidth={1.5} />
-              Atualizar senha
+              {pwLoading ? "Atualizando…" : "Atualizar senha"}
             </button>
           </form>
         </section>
