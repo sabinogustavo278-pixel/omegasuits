@@ -1,14 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { UserCircle2, Upload, Trash2, KeyRound, Check } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { processImageFile } from "@/lib/image-processing";
-import { isAuthenticated } from "@/lib/mock-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/lib/mock-auth";
 import {
   clearAvatar,
-  getPassword,
   setAvatar,
-  setPassword,
   useAvatar,
 } from "@/lib/mock-account";
 
@@ -20,24 +19,27 @@ export const Route = createFileRoute("/conta")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !isAuthenticated()) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: ContaPage,
 });
 
 function ContaPage() {
+  const navigate = useNavigate();
+  const { session, loading: sessionLoading } = useSession();
   const avatar = useAvatar();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
 
-  const [pwCurrent, setPwCurrent] = useState("");
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!sessionLoading && !session) {
+      navigate({ to: "/login" });
+    }
+  }, [session, sessionLoading, navigate]);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -56,28 +58,30 @@ function ContaPage() {
     }
   }
 
-  function handlePassword(e: React.FormEvent) {
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
     setPwMsg(null);
-    const current = getPassword();
-    if (pwCurrent !== current) {
-      setPwMsg({ tone: "err", text: "Senha atual incorreta." });
-      return;
-    }
-    if (pwNew.length < 4) {
-      setPwMsg({ tone: "err", text: "A nova senha deve ter ao menos 4 caracteres." });
+    if (pwNew.length < 6) {
+      setPwMsg({ tone: "err", text: "A nova senha deve ter ao menos 6 caracteres." });
       return;
     }
     if (pwNew !== pwConfirm) {
       setPwMsg({ tone: "err", text: "As senhas não coincidem." });
       return;
     }
-    setPassword(pwNew);
-    setPwCurrent("");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: pwNew });
+    setPwLoading(false);
+    if (error) {
+      setPwMsg({ tone: "err", text: error.message });
+      return;
+    }
     setPwNew("");
     setPwConfirm("");
     setPwMsg({ tone: "ok", text: "Senha atualizada com sucesso." });
   }
+
+  if (sessionLoading || !session) return null;
 
   return (
     <AdminShell eyebrow="Perfil" title="Minha conta">
@@ -140,20 +144,12 @@ function ContaPage() {
           <p className="text-[10px] uppercase tracking-[0.32em] text-accent">Segurança</p>
           <h2 className="mt-2 font-serif text-2xl text-foreground">Alterar senha</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Mínimo de 4 caracteres. A alteração é aplicada imediatamente.
+            Mínimo de 6 caracteres. A senha é atualizada via Supabase Auth.
           </p>
 
           <form onSubmit={handlePassword} className="mt-8 space-y-4">
-            <Field label="Senha atual">
-              <input
-                type="password"
-                value={pwCurrent}
-                onChange={(e) => setPwCurrent(e.target.value)}
-                className="w-full border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-foreground"
-                autoComplete="current-password"
-              />
-            </Field>
             <Field label="Nova senha">
+
               <input
                 type="password"
                 value={pwNew}
@@ -187,10 +183,11 @@ function ContaPage() {
 
             <button
               type="submit"
-              className="inline-flex items-center gap-2 border border-foreground bg-foreground px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-background transition-colors hover:bg-transparent hover:text-foreground"
+              disabled={pwLoading}
+              className="inline-flex items-center gap-2 border border-foreground bg-foreground px-6 py-3 text-[11px] uppercase tracking-[0.28em] text-background transition-colors hover:bg-transparent hover:text-foreground disabled:opacity-60"
             >
               <KeyRound className="h-4 w-4" strokeWidth={1.5} />
-              Atualizar senha
+              {pwLoading ? "Atualizando…" : "Atualizar senha"}
             </button>
           </form>
         </section>

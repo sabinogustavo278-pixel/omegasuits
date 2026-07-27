@@ -1,38 +1,38 @@
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
-const KEY = "omega_auth";
-const EVT = "omega_auth_change";
+// Backward-compatible API: this module now wraps Supabase Auth.
+// The name is kept to avoid a churn-heavy rename across the app.
 
-export const isAuthenticated = () => {
-  if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(KEY) === "1";
-};
+export function useSession(): { session: Session | null; loading: boolean } {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const signIn = () => {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(KEY, "1");
-    window.dispatchEvent(new CustomEvent(EVT));
-  }
-};
-
-export const signOut = () => {
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem(KEY);
-    window.dispatchEvent(new CustomEvent(EVT));
-  }
-};
-
-export function useIsAuthenticated(): boolean {
-  const [auth, setAuth] = useState(false);
   useEffect(() => {
-    const sync = () => setAuth(isAuthenticated());
-    sync();
-    window.addEventListener(EVT, sync);
-    window.addEventListener("storage", sync);
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setSession(data.session);
+      setLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+    });
     return () => {
-      window.removeEventListener(EVT, sync);
-      window.removeEventListener("storage", sync);
+      mounted = false;
+      sub.subscription.unsubscribe();
     };
   }, []);
-  return auth;
+
+  return { session, loading };
+}
+
+export function useIsAuthenticated(): boolean {
+  const { session } = useSession();
+  return !!session;
+}
+
+export async function signOut() {
+  await supabase.auth.signOut();
 }
