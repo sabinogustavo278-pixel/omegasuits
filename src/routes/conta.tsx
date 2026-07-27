@@ -144,20 +144,12 @@ function ContaPage() {
           <p className="text-[10px] uppercase tracking-[0.32em] text-accent">Segurança</p>
           <h2 className="mt-2 font-serif text-2xl text-foreground">Alterar senha</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Mínimo de 4 caracteres. A alteração é aplicada imediatamente.
+            Mínimo de 6 caracteres. A senha é atualizada via Supabase Auth.
           </p>
 
           <form onSubmit={handlePassword} className="mt-8 space-y-4">
-            <Field label="Senha atual">
-              <input
-                type="password"
-                value={pwCurrent}
-                onChange={(e) => setPwCurrent(e.target.value)}
-                className="w-full border border-border bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-foreground"
-                autoComplete="current-password"
-              />
-            </Field>
             <Field label="Nova senha">
+
               <input
                 type="password"
                 value={pwNew}
