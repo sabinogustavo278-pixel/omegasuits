@@ -1,22 +1,39 @@
-## Correções de navegação e autenticação
+## Objetivo
 
-### 1. Botão "Entrar" no cabeçalho da loja
-Em `src/components/SiteHeader.tsx`, substituir o link "Conta" por um comportamento condicional:
-- Se não autenticado (`isAuthenticated()` de `mock-auth`): mostrar link **"Entrar"** → `/login`.
-- Se autenticado: manter o ícone/link "Conta" → `/conta`.
-- Usar hook local com `useEffect` + listener de `storage` para reagir a login/logout (mesmo padrão de `useActiveRole`).
+1. Criar a página de checkout de compras com carrinho mock.
+2. Revisar as telas existentes para reforçar o padrão da base de conhecimento (paleta marinho/carvão/marfim + dourado, Cormorant/Inter, sidebar filtrada por perfil, cadastros com Template/Importar/Novo, tabelas com filtro e ordenação, upload de imagem tratada).
 
-### 2. Proteger a rota `/conta`
-Em `src/routes/conta.tsx`, adicionar `beforeLoad` que verifica `isAuthenticated()` e, se falso, faz `throw redirect({ to: "/login" })`. Como `isAuthenticated` lê `localStorage`, o guard só roda no cliente (rota já é client-side no template atual); adicionar guard também dentro do componente como fallback de SSR (retornar `null` + `navigate` em `useEffect`).
+## Escopo
 
-### 3. Redirecionamento por perfil após login
-Em `src/routes/login.tsx`, no `handleSubmit`:
-- Chamar `signIn()`.
-- Ler `getActiveRole()` de `mock-roles`.
-- Se `usuario` → `navigate({ to: "/" })`.
-- Se `admin` ou `gerente` → `navigate({ to: "/dashboard" })`.
+### 1. Carrinho + Checkout
 
-### Notas técnicas
-- Nenhuma mudança em backend, dados ou outras rotas.
-- `mock-auth.ts` e `mock-roles.ts` já expõem tudo o que é necessário; não precisam ser alterados.
-- O `AdminShell` continua acessível sem login (escopo atual mantido); apenas `/conta` passa a exigir sessão.
+- `src/lib/mock-cart.ts`: estado do carrinho em `localStorage` (chave `omega:cart`) com hook `useCart` via `useSyncExternalStore` (add, remove, updateQty, clear, itens, subtotal). Dispara evento para sincronizar o header.
+- `ProductCard`: botão discreto "Adicionar à sacola" abaixo do preço.
+- `SiteHeader`: ícone de sacola com contador, linkando para `/checkout`.
+- Nova rota `src/routes/checkout.tsx`:
+  - SiteHeader/SiteFooter, tipografia Cormorant nos títulos, acentos dourados.
+  - Coluna esquerda: itens do carrinho (thumb, nome, categoria, preço, seletor de qty, remover) + estado vazio elegante com link para a loja.
+  - Coluna direita: resumo (subtotal, frete cortesia, total), campo de cupom (mock), botão "Finalizar compra".
+  - Formulário de entrega (nome, e-mail, endereço, CEP) e pagamento (número do cartão, validade, CVV) com máscaras simples inline e validação leve.
+  - Ao confirmar: modal "Pedido recebido" com número mock e limpa o carrinho.
+  - `head()` próprio; sem OG image.
+
+### 2. Alinhamento ao padrão da base de conhecimento
+
+Ajustes de padrão nas telas existentes, sem alterar lógica de negócio:
+
+- `AdminShell`: filtrar itens da sidebar pela matriz `mock-roles` — rotas restritas ao perfil ativo somem em vez de aparecerem esmaecidas com badge "Restrito".
+- Cadastros que ainda não têm campo de imagem tratada — `fornecedores`, `categorias`, `clientes`, `usuarios`: adicionar upload no painel "Novo" usando `processImageFile` (armazenado como data URL mock, simulando bucket).
+- Verificação de todas as telas de cadastro/tabela: garantir presença de `CadastroActions` (Template · Importar · Novo), campo de filtro e cabeçalhos ordenáveis via `useTableSort`; completar onde faltar.
+- Ajustes visuais menores para consistência (bordas, spacings e uso do dourado como acento).
+
+## Detalhes técnicos
+
+- Máscaras (cartão, validade, CVV, CEP): funções inline em `checkout.tsx`, sem novas libs.
+- Nenhuma dependência nova; nada de Cloud/DB — pedidos apenas confirmados via modal.
+- `routeTree.gen.ts` regenera automaticamente após criar `checkout.tsx`.
+
+## Fora de escopo
+- Persistência de pedidos, integração real de pagamento.
+- Geração de novas imagens de produtos.
+- Alterações em rotas administrativas além dos ajustes de padrão listados.
