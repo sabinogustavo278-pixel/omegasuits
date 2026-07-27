@@ -63,7 +63,13 @@ function UsuariosPage() {
           entity="Usuário"
           templateName="usuarios-template.csv"
           templateColumns={["nome", "email", "perfil", "status"]}
+          formFields={[
+            { name: "nome", label: "Nome" },
+            { name: "email", label: "E-mail", type: "email" },
+            { name: "perfil", label: "Perfil (admin/gerente/usuario)" },
+          ]}
         />
+
       }
     >
       <div className="mb-6 border border-accent/30 bg-accent/5 px-6 py-4 text-sm">

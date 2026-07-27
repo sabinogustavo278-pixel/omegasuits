@@ -73,7 +73,15 @@ function ProdutosPage() {
           entity="Produto"
           templateName="produtos-template.csv"
           templateColumns={["sku", "nome", "categoria", "preco", "estoque_inicial", "descricao", "imagem"]}
+          formFields={[
+            { name: "sku", label: "SKU" },
+            { name: "nome", label: "Nome" },
+            { name: "categoria", label: "Categoria" },
+            { name: "preco", label: "Preço (R$)" },
+            { name: "descricao", label: "Descrição", type: "textarea" },
+          ]}
         />
+
       }
     >
       <div className="mb-6 flex flex-wrap items-center gap-3">

@@ -50,7 +50,17 @@ function FornecedoresPage() {
           entity="Fornecedor"
           templateName="fornecedores-template.csv"
           templateColumns={["razao_social", "cnpj", "contato", "email", "telefone", "cidade", "uf", "categoria"]}
+          formFields={[
+            { name: "razao", label: "Razão social" },
+            { name: "cnpj", label: "CNPJ" },
+            { name: "contato", label: "Contato" },
+            { name: "email", label: "E-mail", type: "email" },
+            { name: "telefone", label: "Telefone", type: "tel" },
+            { name: "cidade", label: "Cidade/UF" },
+            { name: "categoria", label: "Categoria" },
+          ]}
         />
+
       }
     >
       <div className="mb-6 flex flex-wrap items-center gap-3">

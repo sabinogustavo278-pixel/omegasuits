@@ -1,6 +1,14 @@
 import { formatPrice, type Product } from "@/data/products";
+import { addToCart } from "@/lib/mock-cart";
+import { useState } from "react";
 
 export function ProductCard({ product }: { product: Product }) {
+  const [added, setAdded] = useState(false);
+  const onAdd = () => {
+    addToCart(product.id, 1);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1400);
+  };
   return (
     <article className="group flex flex-col">
       <div className="relative overflow-hidden bg-secondary">
@@ -27,6 +35,13 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="mt-2 text-sm tracking-wide text-foreground">
           {formatPrice(product.price)}
         </p>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="mt-4 inline-flex items-center justify-center border border-foreground/70 px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-foreground transition-colors hover:border-accent hover:text-accent"
+        >
+          {added ? "Adicionado ✓" : "Adicionar à sacola"}
+        </button>
       </div>
     </article>
   );

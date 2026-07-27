@@ -50,7 +50,15 @@ function PedidosPage() {
           entity="Pedido"
           templateName="pedidos-compra-template.csv"
           templateColumns={["numero", "fornecedor_cnpj", "data_emissao", "data_previsao", "sku", "quantidade", "custo_unitario"]}
+          withImage={false}
+          formFields={[
+            { name: "fornecedor", label: "Fornecedor" },
+            { name: "emissao", label: "Data de emissão" },
+            { name: "previsao", label: "Previsão de entrega" },
+            { name: "observacao", label: "Observação", type: "textarea" },
+          ]}
         />
+
       }
     >
       <div className="mb-8 grid gap-4 md:grid-cols-3">

@@ -51,7 +51,16 @@ function EstoquePage() {
           entity="Movimentação"
           templateName="estoque-template.csv"
           templateColumns={["sku", "deposito", "tipo", "quantidade", "custo_unitario", "data", "observacao"]}
+          withImage={false}
+          formFields={[
+            { name: "sku", label: "SKU" },
+            { name: "deposito", label: "Depósito" },
+            { name: "tipo", label: "Tipo (entrada/saída)" },
+            { name: "quantidade", label: "Quantidade" },
+            { name: "observacao", label: "Observação", type: "textarea" },
+          ]}
         />
+
       }
     >
       <div className="mb-8 grid gap-4 md:grid-cols-3">
