@@ -19,6 +19,7 @@ import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
@@ -77,6 +78,11 @@ const ClientesRoute = ClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
+    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
   CategoriasRoute: typeof CategoriasRoute
+  CheckoutRoute: typeof CheckoutRoute
   ClientesRoute: typeof ClientesRoute
   ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
@@ -322,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categorias': {
       id: '/categorias'
       path: '/categorias'
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
   CategoriasRoute: CategoriasRoute,
+  CheckoutRoute: CheckoutRoute,
   ClientesRoute: ClientesRoute,
   ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,

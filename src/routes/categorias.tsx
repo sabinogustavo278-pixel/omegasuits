@@ -50,7 +50,14 @@ function CategoriasPage() {
           entity="Categoria"
           templateName="categorias-template.csv"
           templateColumns={["nome", "categoria_pai", "slug", "descricao", "ordem"]}
+          formFields={[
+            { name: "nome", label: "Nome" },
+            { name: "pai", label: "Categoria pai" },
+            { name: "slug", label: "Slug" },
+            { name: "descricao", label: "Descrição", type: "textarea" },
+          ]}
         />
+
       }
     >
       <div className="mb-6 flex flex-wrap items-center gap-3">

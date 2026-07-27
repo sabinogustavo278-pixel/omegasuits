@@ -61,7 +61,15 @@ function ClientesPage() {
             entity="Cliente"
             templateName="clientes-template.csv"
             templateColumns={["nome", "email", "telefone", "cpf", "cidade", "uf", "endereco", "observacoes"]}
+            formFields={[
+              { name: "nome", label: "Nome" },
+              { name: "email", label: "E-mail", type: "email" },
+              { name: "telefone", label: "Telefone", type: "tel" },
+              { name: "cidade", label: "Cidade/UF" },
+              { name: "observacoes", label: "Observações", type: "textarea" },
+            ]}
           />
+
         )
       }
     >
