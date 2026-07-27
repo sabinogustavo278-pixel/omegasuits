@@ -1,14 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { UserCircle2, Upload, Trash2, KeyRound, Check } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { processImageFile } from "@/lib/image-processing";
-import { isAuthenticated } from "@/lib/mock-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@/lib/mock-auth";
 import {
   clearAvatar,
-  getPassword,
   setAvatar,
-  setPassword,
   useAvatar,
 } from "@/lib/mock-account";
 
@@ -20,24 +19,27 @@ export const Route = createFileRoute("/conta")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !isAuthenticated()) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: ContaPage,
 });
 
 function ContaPage() {
+  const navigate = useNavigate();
+  const { session, loading: sessionLoading } = useSession();
   const avatar = useAvatar();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
 
-  const [pwCurrent, setPwCurrent] = useState("");
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!sessionLoading && !session) {
+      navigate({ to: "/login" });
+    }
+  }, [session, sessionLoading, navigate]);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -56,28 +58,30 @@ function ContaPage() {
     }
   }
 
-  function handlePassword(e: React.FormEvent) {
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
     setPwMsg(null);
-    const current = getPassword();
-    if (pwCurrent !== current) {
-      setPwMsg({ tone: "err", text: "Senha atual incorreta." });
-      return;
-    }
-    if (pwNew.length < 4) {
-      setPwMsg({ tone: "err", text: "A nova senha deve ter ao menos 4 caracteres." });
+    if (pwNew.length < 6) {
+      setPwMsg({ tone: "err", text: "A nova senha deve ter ao menos 6 caracteres." });
       return;
     }
     if (pwNew !== pwConfirm) {
       setPwMsg({ tone: "err", text: "As senhas não coincidem." });
       return;
     }
-    setPassword(pwNew);
-    setPwCurrent("");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: pwNew });
+    setPwLoading(false);
+    if (error) {
+      setPwMsg({ tone: "err", text: error.message });
+      return;
+    }
     setPwNew("");
     setPwConfirm("");
     setPwMsg({ tone: "ok", text: "Senha atualizada com sucesso." });
   }
+
+  if (sessionLoading || !session) return null;
 
   return (
     <AdminShell eyebrow="Perfil" title="Minha conta">
