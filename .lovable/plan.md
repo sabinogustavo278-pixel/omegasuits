@@ -1,183 +1,68 @@
-# Descritivo de Campos por Tela — Modelagem do Banco
+## Objetivo
+Trocar o mock de login por Supabase Auth real e criar apenas as tabelas de autenticação/permissão: `profiles`, `user_roles` e `route_permissions`.
 
-Abaixo, o descritivo funcional dos campos de cada tela do painel Omega Suits, pronto para servir de base à modelagem no banco de dados. Todas as tabelas terão também os campos padrão: `id` (UUID), `created_at`, `updated_at` e, quando aplicável, `created_by` (referência ao usuário).
+## 1. Migração SQL (uma única migration)
 
----
+**Enum de perfis**
+- `app_role`: `admin`, `gerente`, `usuario`.
 
-## 1. Usuários (`/usuarios`)
-Cadastro das pessoas com acesso ao painel.
+**`public.profiles`** (dados do usuário logado)
+- `id uuid PK` referenciando `auth.users(id) ON DELETE CASCADE`
+- `nome text`, `email text`, `telefone text`, `avatar_url text`, `status text default 'ativo'`, `ultimo_acesso timestamptz`
+- `created_at`, `updated_at` + trigger de updated_at
+- Trigger `on_auth_user_created` → cria linha em `profiles` e em `user_roles` (default `usuario`) a partir dos metadados do signup.
 
-- **nome** — nome completo do usuário
-- **email** — e-mail de login (único)
-- **senha** — hash da senha (nunca em texto puro)
-- **perfil / role** — vínculo com a tabela de perfis (admin, gerente, usuario)
-- **avatar** — imagem de perfil (armazenada em bucket, guardar URL/caminho)
-- **status** — Ativo / Pausado
-- **ultimo_acesso** — data/hora do último login
-- **telefone** *(opcional)*
+**`public.user_roles`** (roles separadas do profile — obrigatório por segurança)
+- `id uuid PK`, `user_id uuid → auth.users`, `role app_role`, unique(user_id, role).
+- Função `has_role(_user_id uuid, _role app_role) returns boolean security definer`.
 
-## 2. Perfis (`/perfis`)
-Definição dos perfis de acesso.
+**`public.route_permissions`** (matriz perfil × rota)
+- `id uuid PK`, `role app_role`, `rota text`, `permissao text check in ('total','leitura','negado')`, unique(role, rota).
+- Seed com a matriz atual do `mock-roles.ts` (dashboard, fornecedores, produtos, clientes, usuários, perfis, acessos, estoque, categorias, conta).
 
-- **nome** — Administrador, Gerente, Usuário
-- **descricao** — texto curto sobre o perfil
-- **nivel** — código/enum (`admin`, `gerente`, `usuario`)
+**GRANTs + RLS** (segue o padrão da base de conhecimento):
+- `profiles`: usuário lê/atualiza o próprio; admin lê/atualiza todos (via `has_role`).
+- `user_roles`: usuário lê as próprias; só admin insere/atualiza/remove.
+- `route_permissions`: leitura para `authenticated`; escrita só admin.
 
-## 3. Acessos por Rota (`/acessos`)
-Matriz de permissões perfil × rota.
+## 2. Frontend — Login real
 
-- **perfil_id** — referência ao perfil
-- **rota** — caminho da rota (ex.: `/produtos`)
-- **permissao** — `total`, `leitura`, `negado`
+**Client Supabase**: já existe (`@/integrations/supabase/client`).
 
----
+**Substituir `src/lib/mock-auth.ts`** por hooks baseados em Supabase:
+- `useSession()` — assina `onAuthStateChange` e expõe `user`, `loading`.
+- `useIsAuthenticated()` — mantém a mesma API para não quebrar `SiteHeader`.
+- `useCurrentRole()` — busca role via `user_roles` (query cached).
+- `signOut()` — `supabase.auth.signOut()`.
 
-## 4. Clientes (`/clientes`)
-Cadastro de clientes da loja.
+**`src/routes/login.tsx`**
+- Formulário passa a chamar `supabase.auth.signInWithPassword({ email, password })`.
+- Adicionar aba/link "Criar conta" com `supabase.auth.signUp` (nome + email + senha; salva `nome` em `options.data` para o trigger popular `profiles`).
+- Após login, lê role do usuário e redireciona: `admin`/`gerente` → `/dashboard`, `usuario` → `/`.
+- Exibe erros do Supabase.
 
-- **nome** — nome completo
-- **email** — e-mail de contato
-- **telefone** — telefone/celular
-- **cpf** — documento
-- **endereco** — logradouro, número, complemento
-- **cidade** e **uf**
-- **cep**
-- **observacoes** — campo livre
-- **avatar/foto** — imagem opcional (bucket)
-- **status** — Ativo / Pausado
-- **ultima_compra** — data (derivado de pedidos)
-- **total_investido** — soma de compras (derivado)
+**`src/routes/__root.tsx`**
+- Registrar um único `onAuthStateChange` no efeito raiz que invalida o router em `SIGNED_IN`/`SIGNED_OUT`/`USER_UPDATED`.
 
----
+**`src/routes/conta.tsx`**
+- Trocar guard `beforeLoad` mockado por checagem de sessão via `supabase.auth.getUser()` no client (usando `useEffect` + redirect), mantendo comportamento atual.
+- Alteração de senha passa a chamar `supabase.auth.updateUser({ password })`.
 
-## 5. Fornecedores (`/fornecedores`)
-Cadastro de fornecedores.
+**`src/lib/mock-roles.ts`**
+- Manter arquivo, mas `getActiveRole()`/`useActiveRole()` passam a ler do Supabase (`user_roles`) com fallback `usuario` para deslogados. `RoleSwitcher` fica oculto (ou removido do header) — a role real vem do banco. Ainda usado internamente pelo `RoleGate` e `AdminShell`.
+- `canAccess()` continua consultando a matriz local; **não** trocamos para consultar `route_permissions` agora (fora do escopo — só criamos a tabela).
 
-- **razao_social**
-- **nome_fantasia**
-- **cnpj**
-- **email**
-- **telefone**
-- **contato_responsavel**
-- **endereco**, **cidade**, **uf**, **cep**
-- **categoria_fornecimento** — tecidos, calçados, acessórios etc.
-- **logo/imagem** — bucket
-- **observacoes**
-- **status** — Ativo / Inativo
+## 3. Fora de escopo (próximas etapas)
+- Ler `route_permissions` dinamicamente no frontend.
+- Demais tabelas de negócio (clientes, produtos, fornecedores, estoque, pedidos).
+- Upload de avatar para bucket.
 
-## 6. Pedidos de Compra (`/fornecedores/pedido`)
-Pedidos feitos aos fornecedores.
+## 4. Verificação
+- `bun run build` ok.
+- Fluxo manual: signup → aparece em `profiles` e `user_roles`; login redireciona conforme role; `/conta` redireciona quando deslogado; logout limpa sessão.
 
-Cabeçalho:
-- **numero** — identificador do pedido (ex.: PC-2025-0142)
-- **fornecedor_id** — referência
-- **data_emissao**
-- **data_previsao_entrega**
-- **status** — Rascunho / Enviado / Recebido
-- **total** — valor total (derivado dos itens)
-- **observacao**
-
-Itens do pedido (tabela filha):
-- **pedido_id**
-- **sku / produto_id**
-- **quantidade**
-- **custo_unitario**
-- **subtotal**
-
----
-
-## 7. Categorias (`/categorias`)
-Categorias de produtos da loja.
-
-- **nome** — Ternos, Camisaria, Calçados, Acessórios…
-- **slug** — usado nas rotas
-- **descricao**
-- **imagem** — bucket
-- **ordem_exibicao**
-- **status** — Ativa / Inativa
-
-## 8. Produtos (`/produtos`)
-Catálogo de produtos.
-
-- **sku** — código único
-- **nome**
-- **descricao**
-- **categoria_id** — referência
-- **preco**
-- **preco_promocional** *(opcional)*
-- **imagens** — múltiplas imagens (bucket), com imagem principal
-- **tecido / material**
-- **cor**
-- **tamanhos_disponiveis**
-- **peso**
-- **status** — Ativo / Inativo / Esgotado
-- **destaque** — booleano (aparece em coleções)
-
-## 9. Estoque (`/estoque`)
-Movimentações e saldo por SKU/depósito.
-
-Depósitos:
-- **nome** — Ateliê SP, CD Barueri, Cofre…
-- **endereco**
-
-Saldo (view/tabela agregada):
-- **produto_id / sku**
-- **deposito_id**
-- **saldo** — quantidade total
-- **reservado** — quantidade reservada
-- **disponivel** — saldo − reservado (derivado)
-- **status** — OK / Crítico / Ruptura (derivado por regra)
-- **ultima_movimentacao**
-
-Movimentações (histórico):
-- **produto_id / sku**
-- **deposito_id**
-- **tipo** — entrada / saída / ajuste / reserva
-- **quantidade**
-- **custo_unitario**
-- **data**
-- **origem** — pedido de compra, venda, ajuste manual
-- **observacao**
-
----
-
-## 10. Checkout / Pedidos de Venda (`/checkout`)
-Compras realizadas pelos clientes.
-
-Cabeçalho do pedido:
-- **numero_pedido**
-- **cliente_id** — referência
-- **data_pedido**
-- **status** — Aguardando pagamento / Pago / Enviado / Entregue / Cancelado
-- **subtotal**, **frete**, **desconto**, **total**
-- **forma_pagamento** — cartão, pix, boleto
-- **dados_pagamento** — últimos dígitos, bandeira (nunca dados sensíveis completos)
-
-Endereço de entrega (pode ser tabela ou embutido):
-- **cep**, **logradouro**, **numero**, **complemento**, **bairro**, **cidade**, **uf**
-- **destinatario**, **telefone_contato**
-
-Itens do pedido:
-- **pedido_id**
-- **produto_id / sku**
-- **quantidade**
-- **preco_unitario**
-- **subtotal**
-
----
-
-## 11. Conta do Usuário Logado (`/conta`)
-Não é uma nova tabela — reutiliza `usuarios`:
-- **avatar** (upload, bucket)
-- **senha_atual** e **nova_senha** (fluxo de alteração)
-
----
-
-## Observações de modelagem
-
-- Todas as imagens (avatars, produtos, categorias, fornecedores) devem ser armazenadas em **buckets de storage**, guardando no banco apenas o caminho/URL. O tratamento client-side já existe em `src/lib/image-processing.ts`.
-- Enums recomendados: `perfil` (admin/gerente/usuario), `status_generico` (ativo/pausado/inativo), `status_pedido_compra`, `status_pedido_venda`, `status_estoque`, `tipo_movimentacao_estoque`.
-- Relacionamentos-chave: usuários→perfis; clientes→pedidos de venda; produtos→categoria; produtos↔depósitos (via saldo); pedidos de compra→fornecedores→itens; pedidos de venda→cliente→itens.
-- Cada entidade principal deve ter RLS quando o backend for ativado, restringindo escrita aos perfis definidos na matriz de acessos.
-
-Este descritivo é apenas documental — nenhum arquivo será alterado. Se aprovar, no próximo passo posso gerar a migração SQL correspondente (com GRANTs e RLS) para as tabelas listadas.
+## Detalhes técnicos
+- Usar `emailRedirectTo: window.location.origin` no `signUp`.
+- Confirmação de email do Supabase: assumir **desativada** (padrão do dev) para o usuário de teste funcionar direto. Se estiver ativa, o signup exige confirmação por email.
+- Não usar `service_role` no frontend. Trigger `handle_new_user` roda como `security definer`.
+- Após a migration, o arquivo `src/integrations/supabase/types.ts` é regenerado automaticamente — só então os hooks tipados de `profiles`/`user_roles` funcionam.
