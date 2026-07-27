@@ -12,6 +12,7 @@ const nav = [
 
 export function SiteHeader() {
   const authed = useIsAuthenticated();
+  const { count } = useCart();
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center px-6 py-5 md:px-10">
@@ -48,6 +49,18 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          <Link
+            to="/checkout"
+            aria-label="Sacola"
+            className="relative inline-flex items-center gap-2 transition-colors hover:text-foreground"
+          >
+            <ShoppingBag className="h-4 w-4" strokeWidth={1.25} />
+            {count > 0 ? (
+              <span className="absolute -right-3 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-medium tracking-normal text-charcoal">
+                {count}
+              </span>
+            ) : null}
+          </Link>
           {authed ? (
             <Link
               to="/conta"
