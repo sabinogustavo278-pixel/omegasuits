@@ -1,160 +1,48 @@
-## Descritivo de campos por tela (para modelagem do banco)
+## Migration completa das tabelas de negócio
 
-Abaixo estão os campos de cada tela de cadastro/gestão do sistema, para criar as tabelas no Supabase. Autenticação (profiles/user_profiles/route_permissions) já está no banco — este documento cobre apenas as tabelas de negócio que ainda faltam.
+Vou criar uma única migration com todas as 11 tabelas do `.lovable/plan.md`, respeitando a ordem de FKs, com GRANTs, RLS, políticas, triggers de `updated_at` e buckets de Storage.
 
-Convenção comum a todas as tabelas: `id uuid PK`, `created_at timestamptz`, `updated_at timestamptz` (com trigger), e `imagem_url text` quando houver upload de imagem (bucket no Storage).
+### Ordem de criação (respeita FKs)
 
----
-
-### 1. Fornecedores — `/fornecedores`
-Tabela: `fornecedores`
-- `razao_social` text — Razão Social (obrigatório)
-- `nome_fantasia` text
-- `cnpj` text unique — CNPJ (obrigatório)
-- `inscricao_estadual` text
-- `email` text
-- `telefone` text
-- `contato_nome` text — Nome do contato principal
-- `endereco` text
-- `cidade` text
-- `estado` text (UF, 2 chars)
-- `cep` text
-- `categoria` text — Ex.: Tecidos, Calçados, Acessórios
-- `status` text default 'ativo' — ativo | inativo
-- `observacoes` text
-- `imagem_url` text — Logo/foto do fornecedor
-
-### 2. Pedidos de Compra — `/fornecedores/pedido`
-Tabela: `pedidos_compra`
-- `numero` text unique — Número do pedido
-- `fornecedor_id` uuid FK → fornecedores
-- `data_pedido` date
-- `data_entrega_prevista` date
-- `data_entrega_real` date
-- `status` text — rascunho | enviado | recebido | cancelado
-- `valor_total` numeric(12,2)
-- `condicao_pagamento` text
-- `observacoes` text
-
-Tabela: `pedidos_compra_itens` (itens do pedido)
-- `pedido_id` uuid FK → pedidos_compra
-- `produto_id` uuid FK → produtos
-- `quantidade` int
-- `preco_unitario` numeric(12,2)
-- `subtotal` numeric(12,2)
-
-### 3. Categorias — `/categorias`
-Tabela: `categorias`
-- `nome` text (obrigatório)
-- `slug` text unique
-- `categoria_pai_id` uuid FK → categorias (self-reference, nullable)
-- `descricao` text
-- `ordem` int
-- `status` text — publicado | rascunho
-- `imagem_url` text
-
-### 4. Produtos — `/produtos`
-Tabela: `produtos`
-- `sku` text unique — Código do produto
-- `nome` text (obrigatório)
-- `descricao` text
-- `categoria_id` uuid FK → categorias
-- `fornecedor_id` uuid FK → fornecedores (nullable)
-- `preco` numeric(12,2)
-- `preco_promocional` numeric(12,2)
-- `custo` numeric(12,2)
-- `peso` numeric(8,3) — em kg
-- `tamanho` text — P, M, G, 38, 40, etc.
-- `cor` text
-- `material` text
-- `status` text — publicado | rascunho | esgotado
-- `destaque` boolean default false
-- `imagem_url` text — imagem principal
-
-Tabela: `produtos_imagens` (galeria)
-- `produto_id` uuid FK → produtos
-- `imagem_url` text
-- `ordem` int
-
-### 5. Estoque — `/estoque`
-Tabela: `estoque`
-- `produto_id` uuid FK → produtos (unique)
-- `quantidade` int default 0
-- `quantidade_minima` int default 0 — alerta de baixo estoque
-- `localizacao` text — Prateleira/depósito
-- `ultima_movimentacao` timestamptz
-
-Tabela: `estoque_movimentacoes` (histórico)
-- `produto_id` uuid FK → produtos
-- `tipo` text — entrada | saida | ajuste
-- `quantidade` int
-- `motivo` text — compra, venda, perda, ajuste
-- `referencia_id` uuid — id do pedido/venda relacionado
-- `usuario_id` uuid FK → user_profiles
-
-### 6. Clientes — `/clientes`
-Tabela: `clientes`
-- `nome` text (obrigatório)
-- `cpf` text unique
-- `email` text
-- `telefone` text
-- `data_nascimento` date
-- `endereco` text
-- `cidade` text
-- `estado` text
-- `cep` text
-- `status` text default 'ativo' — ativo | inativo
-- `total_pedidos` int default 0
-- `valor_total_gasto` numeric(12,2) default 0
-- `ultima_compra` timestamptz
-- `observacoes` text
-- `imagem_url` text — avatar
-
-### 7. Checkout / Vendas — `/checkout`
-Tabela: `pedidos_venda`
-- `numero` text unique
-- `cliente_id` uuid FK → clientes (nullable p/ guest checkout)
-- `data_pedido` timestamptz default now()
-- `status` text — pendente | pago | enviado | entregue | cancelado
-- `subtotal` numeric(12,2)
-- `frete` numeric(12,2)
-- `desconto` numeric(12,2)
-- `valor_total` numeric(12,2)
-- `metodo_pagamento` text — cartao | pix | boleto
-- `endereco_entrega` text
-- `cidade_entrega` text, `estado_entrega` text, `cep_entrega` text
-- `observacoes` text
-
-Tabela: `pedidos_venda_itens`
-- `pedido_id` uuid FK → pedidos_venda
-- `produto_id` uuid FK → produtos
-- `quantidade` int
-- `preco_unitario` numeric(12,2)
-- `subtotal` numeric(12,2)
-
----
-
-### Storage buckets sugeridos
-- `fornecedores` — logos
-- `produtos` — imagens principal + galeria
-- `categorias` — banners
-- `clientes` — avatares
-- `avatars` — avatares de user_profiles (já usado em /conta)
-
-### Ordem sugerida de criação (respeitando FKs)
-1. `categorias` (self-FK)
+1. `categorias` (self-FK `categoria_pai_id`)
 2. `fornecedores`
-3. `produtos` → `produtos_imagens`
-4. `estoque` → `estoque_movimentacoes`
-5. `clientes`
-6. `pedidos_compra` → `pedidos_compra_itens`
-7. `pedidos_venda` → `pedidos_venda_itens`
+3. `produtos` (FK → categorias, fornecedores)
+4. `produtos_imagens` (FK → produtos)
+5. `estoque` (FK → produtos, unique)
+6. `estoque_movimentacoes` (FK → produtos, user_profiles)
+7. `clientes`
+8. `pedidos_compra` (FK → fornecedores)
+9. `pedidos_compra_itens` (FK → pedidos_compra, produtos)
+10. `pedidos_venda` (FK → clientes)
+11. `pedidos_venda_itens` (FK → pedidos_venda, produtos)
 
-### RLS (resumo)
-- Leitura pública (`anon`) apenas em `produtos`, `categorias`, `produtos_imagens` com `status = 'publicado'` (necessário para a loja).
-- Escrita restrita a `authenticated` com `has_profile(auth.uid(), 'Administrador')` ou `'Gerente'`.
-- `clientes` e `pedidos_venda`: cliente pode ler/editar apenas os próprios (quando autenticado); admin/gerente veem tudo.
+Campos exatos conforme `.lovable/plan.md` — sem alterações.
 
----
+### Regras de acesso (RLS)
 
-Este documento é apenas o descritivo. Confirme quais tabelas você quer que eu crie primeiro (recomendo começar por `categorias` + `fornecedores` + `produtos` + `estoque`, que são a base do catálogo) e eu preparo a migration.
+- **Leitura pública (`anon`)** apenas em `categorias`, `produtos` e `produtos_imagens` quando `status = 'publicado'` (necessário para a loja pública funcionar sem login).
+- **Escrita** em todas as tabelas restrita a `authenticated` com `has_profile(auth.uid(), 'Administrador')` OU `has_profile(auth.uid(), 'Gerente')`.
+- **Leitura autenticada** em todas as tabelas de gestão (fornecedores, estoque, pedidos_compra, clientes) restrita a Administrador/Gerente.
+- **`clientes` e `pedidos_venda`**: quando o cliente estiver vinculado a `auth.uid()` (futuro), o próprio cliente lê os seus; por ora, apenas Admin/Gerente. Deixo pronto para expansão sem quebrar depois.
+- `service_role` recebe `GRANT ALL` em todas.
+
+### Storage buckets (públicos para leitura, escrita restrita)
+
+Criados via `storage.buckets` + policies:
+- `fornecedores`, `produtos`, `categorias`, `clientes` — todos públicos para leitura (`SELECT`), upload/update/delete apenas por Admin/Gerente autenticado.
+
+### Detalhes técnicos
+
+- Cada tabela: `id uuid PK default gen_random_uuid()`, `created_at`, `updated_at` com trigger reutilizando `public.update_updated_at_column()` (já existe).
+- `numero` em `pedidos_compra` e `pedidos_venda`: `text unique` (geração fica a cargo do app).
+- `subtotal` nos itens: coluna comum (não generated) para manter compatibilidade com inserts do front.
+- FKs com `ON DELETE`: `RESTRICT` em produtos/categorias/fornecedores referenciados por pedidos (evita apagar histórico); `CASCADE` em itens de pedido, `produtos_imagens` e `estoque` quando o pai é removido.
+- Índices em todas as FKs e em `status` de produtos/pedidos.
+- Sem seeds de dados — apenas estrutura, como pedido.
+
+### Após aplicar
+
+- Vou rodar o linter do Supabase e corrigir avisos relacionados a esta migration.
+- Os tipos em `src/integrations/supabase/types.ts` serão regenerados automaticamente; o código do front que hoje usa mocks (produtos, clientes, fornecedores) continua funcionando e pode ser migrado para o banco em passos seguintes.
+
+Confirma que posso disparar a migration exatamente assim?
