@@ -1,112 +1,160 @@
-## Objetivo
+## Descritivo de campos por tela (para modelagem do banco)
 
-Inverter a semântica do banco conforme o padrão do curso:
-- `profiles` passa a ser o **catálogo de cargos** (Administrador, Gerente, Usuário).
-- `user_profiles` passa a ser a **tabela de dados dos usuários**, ligada a um cargo via `profile_id`.
-- `route_permissions` referencia o cargo via `profile_id`.
+Abaixo estão os campos de cada tela de cadastro/gestão do sistema, para criar as tabelas no Supabase. Autenticação (profiles/user_profiles/route_permissions) já está no banco — este documento cobre apenas as tabelas de negócio que ainda faltam.
 
-## 1. Migração SQL (uma única migration)
+Convenção comum a todas as tabelas: `id uuid PK`, `created_at timestamptz`, `updated_at timestamptz` (com trigger), e `imagem_url text` quando houver upload de imagem (bucket no Storage).
 
-### Preparação
-- Dropar policies que dependem de `has_role` / `app_role` em todas as tabelas atuais.
-- Dropar trigger `on_auth_user_created` e função `handle_new_user` (serão recriados).
-- Dropar tabelas `user_roles` e `route_permissions` (reconstruídas com nova FK).
-- Dropar função `has_role(uuid, app_role)`.
-- Renomear tabela atual `profiles` → `user_profiles_old` (backup temporário dos dados de usuário existentes) e depois dropar após migrar linhas.
+---
 
-### Nova `public.profiles` (catálogo de cargos)
-Colunas:
-- `id uuid PK default gen_random_uuid()`
-- `name text not null unique`
-- `description text`
-- `created_at`, `updated_at` + trigger de updated_at
+### 1. Fornecedores — `/fornecedores`
+Tabela: `fornecedores`
+- `razao_social` text — Razão Social (obrigatório)
+- `nome_fantasia` text
+- `cnpj` text unique — CNPJ (obrigatório)
+- `inscricao_estadual` text
+- `email` text
+- `telefone` text
+- `contato_nome` text — Nome do contato principal
+- `endereco` text
+- `cidade` text
+- `estado` text (UF, 2 chars)
+- `cep` text
+- `categoria` text — Ex.: Tecidos, Calçados, Acessórios
+- `status` text default 'ativo' — ativo | inativo
+- `observacoes` text
+- `imagem_url` text — Logo/foto do fornecedor
 
-Seed dos 3 cargos:
-- Administrador — "Acesso total ao sistema, gerenciamento completo."
-- Gerente — "Acesso a relatórios, produtos, estoque e fornecedores."
-- Usuário — "Acesso básico para consultas e operações."
+### 2. Pedidos de Compra — `/fornecedores/pedido`
+Tabela: `pedidos_compra`
+- `numero` text unique — Número do pedido
+- `fornecedor_id` uuid FK → fornecedores
+- `data_pedido` date
+- `data_entrega_prevista` date
+- `data_entrega_real` date
+- `status` text — rascunho | enviado | recebido | cancelado
+- `valor_total` numeric(12,2)
+- `condicao_pagamento` text
+- `observacoes` text
 
-### Nova `public.user_profiles` (dados dos usuários)
-Colunas:
-- `id uuid PK` referenciando `auth.users(id) ON DELETE CASCADE`
-- `name text`
-- `email text`
-- `avatar_url text`
-- `telefone text`, `status text default 'ativo'`, `ultimo_acesso timestamptz` (mantém campos usados hoje pelas telas)
-- `profile_id uuid not null references public.profiles(id) ON DELETE RESTRICT`
-- `created_at`, `updated_at` + trigger
+Tabela: `pedidos_compra_itens` (itens do pedido)
+- `pedido_id` uuid FK → pedidos_compra
+- `produto_id` uuid FK → produtos
+- `quantidade` int
+- `preco_unitario` numeric(12,2)
+- `subtotal` numeric(12,2)
 
-Migração de dados: copiar linhas de `user_profiles_old` para a nova `user_profiles`, atribuindo `profile_id` do cargo "Usuário" como default (não há como recuperar roles individuais sem consultar `user_roles`; se houver linhas em `user_roles`, mapear pelo nome do role para o novo `profile_id`).
+### 3. Categorias — `/categorias`
+Tabela: `categorias`
+- `nome` text (obrigatório)
+- `slug` text unique
+- `categoria_pai_id` uuid FK → categorias (self-reference, nullable)
+- `descricao` text
+- `ordem` int
+- `status` text — publicado | rascunho
+- `imagem_url` text
 
-### Nova `public.route_permissions`
-Colunas:
-- `id uuid PK`
-- `profile_id uuid not null references public.profiles(id) ON DELETE CASCADE`
-- `rota text not null`
-- `permissao text not null check in ('total','leitura','negado')`
-- `unique(profile_id, rota)`
-- `created_at`, `updated_at`
+### 4. Produtos — `/produtos`
+Tabela: `produtos`
+- `sku` text unique — Código do produto
+- `nome` text (obrigatório)
+- `descricao` text
+- `categoria_id` uuid FK → categorias
+- `fornecedor_id` uuid FK → fornecedores (nullable)
+- `preco` numeric(12,2)
+- `preco_promocional` numeric(12,2)
+- `custo` numeric(12,2)
+- `peso` numeric(8,3) — em kg
+- `tamanho` text — P, M, G, 38, 40, etc.
+- `cor` text
+- `material` text
+- `status` text — publicado | rascunho | esgotado
+- `destaque` boolean default false
+- `imagem_url` text — imagem principal
 
-Reseed da matriz atual (dashboard, fornecedores, produtos, clientes, usuários, perfis, acessos, estoque, categorias) usando os UUIDs dos 3 cargos.
+Tabela: `produtos_imagens` (galeria)
+- `produto_id` uuid FK → produtos
+- `imagem_url` text
+- `ordem` int
 
-### Segurança
-- Nova função `has_profile(_user_id uuid, _profile_name text) returns boolean security definer` que faz join `user_profiles → profiles.name`.
-- Revogar `EXECUTE` de `public` e `anon`; conceder apenas a `authenticated`.
-- GRANTs em cada tabela nova (SELECT/INSERT/UPDATE/DELETE para `authenticated`, ALL para `service_role`; `anon` apenas em `profiles` se necessário para tela de cadastro).
-- RLS:
-  - `profiles`: leitura para `authenticated`; escrita só admin (via `has_profile(auth.uid(), 'Administrador')`).
-  - `user_profiles`: usuário lê/atualiza o próprio; admin lê/atualiza todos.
-  - `route_permissions`: leitura para `authenticated`; escrita só admin.
+### 5. Estoque — `/estoque`
+Tabela: `estoque`
+- `produto_id` uuid FK → produtos (unique)
+- `quantidade` int default 0
+- `quantidade_minima` int default 0 — alerta de baixo estoque
+- `localizacao` text — Prateleira/depósito
+- `ultima_movimentacao` timestamptz
 
-### Novo trigger `handle_new_user`
-No signup, insere em `user_profiles` com `profile_id` = id do cargo "Usuário" (lookup por nome). Nome e email vêm de `raw_user_meta_data`.
+Tabela: `estoque_movimentacoes` (histórico)
+- `produto_id` uuid FK → produtos
+- `tipo` text — entrada | saida | ajuste
+- `quantidade` int
+- `motivo` text — compra, venda, perda, ajuste
+- `referencia_id` uuid — id do pedido/venda relacionado
+- `usuario_id` uuid FK → user_profiles
 
-### Drop do enum
-Remover `app_role` ao final (não há mais dependências).
+### 6. Clientes — `/clientes`
+Tabela: `clientes`
+- `nome` text (obrigatório)
+- `cpf` text unique
+- `email` text
+- `telefone` text
+- `data_nascimento` date
+- `endereco` text
+- `cidade` text
+- `estado` text
+- `cep` text
+- `status` text default 'ativo' — ativo | inativo
+- `total_pedidos` int default 0
+- `valor_total_gasto` numeric(12,2) default 0
+- `ultima_compra` timestamptz
+- `observacoes` text
+- `imagem_url` text — avatar
 
-## 2. Frontend — ajustes necessários
+### 7. Checkout / Vendas — `/checkout`
+Tabela: `pedidos_venda`
+- `numero` text unique
+- `cliente_id` uuid FK → clientes (nullable p/ guest checkout)
+- `data_pedido` timestamptz default now()
+- `status` text — pendente | pago | enviado | entregue | cancelado
+- `subtotal` numeric(12,2)
+- `frete` numeric(12,2)
+- `desconto` numeric(12,2)
+- `valor_total` numeric(12,2)
+- `metodo_pagamento` text — cartao | pix | boleto
+- `endereco_entrega` text
+- `cidade_entrega` text, `estado_entrega` text, `cep_entrega` text
+- `observacoes` text
 
-Após a migração, `src/integrations/supabase/types.ts` será regenerado e várias telas quebram. Ajustes:
+Tabela: `pedidos_venda_itens`
+- `pedido_id` uuid FK → pedidos_venda
+- `produto_id` uuid FK → produtos
+- `quantidade` int
+- `preco_unitario` numeric(12,2)
+- `subtotal` numeric(12,2)
 
-- **`src/lib/mock-roles.ts`**: manter tipo `Role` como string (`"admin" | "gerente" | "usuario"`) mapeando para os nomes de cargo no banco (`Administrador`, `Gerente`, `Usuário`). Matriz local `ACCESS_MATRIX` continua sendo a fonte usada por `RoleGate`.
-- **`src/lib/user-role.ts`**: substituir consulta em `user_roles` por join `user_profiles → profiles.name`, e mapear nome → `Role`.
-- **`src/routes/login.tsx`**: `signUp` continua igual; o trigger cuida do vínculo com o cargo padrão.
-- **`src/routes/conta.tsx`**: substituir referências a `profiles.nome/email` por `user_profiles.name/email`.
-- **`src/routes/usuarios.tsx`**: se buscar usuários do banco, usar `user_profiles` com join em `profiles`.
-- **`src/routes/perfis.tsx`** e **`src/routes/acessos.tsx`**: podem continuar usando a matriz local (fora do escopo trocar para leitura dinâmica).
+---
 
-Nada mais no frontend precisa mudar — `RoleGate`, `AdminShell`, `SiteHeader` só dependem do hook `useCurrentRole`.
+### Storage buckets sugeridos
+- `fornecedores` — logos
+- `produtos` — imagens principal + galeria
+- `categorias` — banners
+- `clientes` — avatares
+- `avatars` — avatares de user_profiles (já usado em /conta)
 
-## 3. Fora de escopo
-- Ler `route_permissions` dinamicamente no frontend.
-- Tela para gerenciar CRUD de cargos em `/perfis` a partir da tabela `profiles`.
-- Demais tabelas de negócio (clientes, produtos, etc).
+### Ordem sugerida de criação (respeitando FKs)
+1. `categorias` (self-FK)
+2. `fornecedores`
+3. `produtos` → `produtos_imagens`
+4. `estoque` → `estoque_movimentacoes`
+5. `clientes`
+6. `pedidos_compra` → `pedidos_compra_itens`
+7. `pedidos_venda` → `pedidos_venda_itens`
 
-## 4. Verificação
-- Migration aplica sem erro; linter Supabase sem novos alertas.
-- `bun run build` ok após regeneração de `types.ts`.
-- Fluxo manual: signup cria linha em `user_profiles` com `profile_id` do cargo "Usuário"; login redireciona conforme o cargo; `/conta` mostra nome/email vindos de `user_profiles`.
+### RLS (resumo)
+- Leitura pública (`anon`) apenas em `produtos`, `categorias`, `produtos_imagens` com `status = 'publicado'` (necessário para a loja).
+- Escrita restrita a `authenticated` com `has_profile(auth.uid(), 'Administrador')` ou `'Gerente'`.
+- `clientes` e `pedidos_venda`: cliente pode ler/editar apenas os próprios (quando autenticado); admin/gerente veem tudo.
 
-## Detalhes técnicos
+---
 
-```text
-profiles (cargos)
-  id ─────────────┐
-  name (unique)   │
-  description     │
-                  │
-user_profiles     │
-  id → auth.users │
-  name, email,    │
-  avatar_url,     │
-  profile_id ─────┤
-                  │
-route_permissions │
-  profile_id ─────┘
-  rota
-  permissao
-```
-
-- FK `user_profiles.profile_id` com `ON DELETE RESTRICT` (não permite apagar cargo em uso).
-- FK `route_permissions.profile_id` com `ON DELETE CASCADE` (apagar cargo remove suas permissões).
-- Toda migração roda como um único bloco transacional para evitar estado intermediário quebrado.
+Este documento é apenas o descritivo. Confirme quais tabelas você quer que eu crie primeiro (recomendo começar por `categorias` + `fornecedores` + `produtos` + `estoque`, que são a base do catálogo) e eu preparo a migration.
