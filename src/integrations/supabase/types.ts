@@ -16,11 +16,71 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      route_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permissao: string
+          profile_id: string
+          rota: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permissao: string
+          profile_id: string
+          rota: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permissao?: string
+          profile_id?: string
+          rota?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_permissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
           avatar_url: string | null
           created_at: string
           email: string | null
           id: string
-          nome: string | null
+          name: string | null
+          profile_id: string
           status: string
           telefone: string | null
           ultimo_acesso: string | null
@@ -31,7 +91,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
-          nome?: string | null
+          name?: string | null
+          profile_id: string
           status?: string
           telefone?: string | null
           ultimo_acesso?: string | null
@@ -42,77 +103,35 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
-          nome?: string | null
+          name?: string | null
+          profile_id?: string
           status?: string
           telefone?: string | null
           ultimo_acesso?: string | null
           updated_at?: string
         }
-        Relationships: []
-      }
-      route_permissions: {
-        Row: {
-          created_at: string
-          id: string
-          permissao: string
-          role: Database["public"]["Enums"]["app_role"]
-          rota: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          permissao: string
-          role: Database["public"]["Enums"]["app_role"]
-          rota: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          permissao?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          rota?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
+      has_profile: {
+        Args: { _profile_name: string; _user_id: string }
         Returns: boolean
       }
     }
     Enums: {
-      app_role: "admin" | "gerente" | "usuario"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -239,8 +258,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "gerente", "usuario"],
-    },
+    Enums: {},
   },
 } as const
