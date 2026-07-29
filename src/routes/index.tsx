@@ -38,7 +38,7 @@ function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p) => (
+            {items.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
