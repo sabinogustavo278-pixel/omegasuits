@@ -1,7 +1,8 @@
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
-import { products, type ProductCategory } from "@/data/products";
+import { type ProductCategory } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 
 interface Props {
   category: ProductCategory;
@@ -10,7 +11,8 @@ interface Props {
 }
 
 export function CategoryPage({ category, title, description }: Props) {
-  const items = products.filter((p) => p.category === category);
+  const { items } = useCatalog(category);
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />

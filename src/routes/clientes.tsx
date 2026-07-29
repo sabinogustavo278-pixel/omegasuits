@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { CadastroActions } from "@/components/admin/CadastroActions";
-import { DataTable, StatusPill } from "@/components/admin/DataTable";
-import { useTableSort } from "@/hooks/use-table-sort";
+import { CrudManager } from "@/components/admin/CrudManager";
+import { StatusPill } from "@/components/admin/DataTable";
 import { isReadOnly, useActiveRole } from "@/lib/mock-roles";
 
 export const Route = createFileRoute("/clientes")({
@@ -17,113 +15,87 @@ export const Route = createFileRoute("/clientes")({
   component: ClientesPage,
 });
 
-const rows = [
-  { nome: "Henrique Barros", email: "henrique@barros.adv.br", tel: "(11) 99812-4410", cidade: "São Paulo · SP", ultima: "12/07/2026", total: "R$ 42.900", status: "Ativo" },
-  { nome: "Rafael Toledo",  email: "rafael.toledo@me.com",     tel: "(21) 99231-0087", cidade: "Rio de Janeiro · RJ", ultima: "03/07/2026", total: "R$ 18.200", status: "Ativo" },
-  { nome: "Otávio Camargo", email: "otavio@camargo.co",        tel: "(31) 99772-1140", cidade: "Belo Horizonte · MG", ultima: "28/06/2026", total: "R$ 26.500", status: "Ativo" },
-  { nome: "Lucas Verona",   email: "lucas@verona.eng.br",      tel: "(48) 98811-2233", cidade: "Florianópolis · SC", ultima: "10/06/2026", total: "R$  8.400", status: "Ativo" },
-  { nome: "André Salgado",  email: "asalgado@salgadoco.com",   tel: "(11) 99900-8877", cidade: "São Paulo · SP", ultima: "22/05/2026", total: "R$ 61.300", status: "Ativo" },
-  { nome: "Miguel Fontes",  email: "miguel.fontes@fontes.law", tel: "(51) 99441-2288", cidade: "Porto Alegre · RS", ultima: "04/04/2026", total: "R$  5.100", status: "Pausado" },
-];
+const brl = (v: unknown) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v ?? 0));
 
 function ClientesPage() {
   const role = useActiveRole();
   const readOnly = isReadOnly("/clientes", role);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
-        if (search) {
-          const q = search.toLowerCase();
-          return [r.nome, r.email, r.tel].some((v) => v.toLowerCase().includes(q));
-        }
-        return true;
-      }),
-    [search, status],
-  );
-  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "nome", dir: "asc" });
 
   return (
-    <AdminShell
-      eyebrow="Loja"
-      title="Cadastro de clientes"
-      actions={
-        readOnly ? (
-          <div className="flex items-center justify-end">
-            <span className="border border-accent/40 bg-accent/10 px-4 py-2 text-[10px] uppercase tracking-[0.28em] text-accent">
-              Somente leitura
-            </span>
-          </div>
-        ) : (
-          <CadastroActions
-            entity="Cliente"
-            templateName="clientes-template.csv"
-            templateColumns={["nome", "email", "telefone", "cpf", "cidade", "uf", "endereco", "observacoes"]}
-            formFields={[
-              { name: "nome", label: "Nome" },
-              { name: "email", label: "E-mail", type: "email" },
-              { name: "telefone", label: "Telefone", type: "tel" },
-              { name: "cidade", label: "Cidade/UF" },
-              { name: "observacoes", label: "Observações", type: "textarea" },
-            ]}
-          />
-
-        )
-      }
-    >
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nome, e-mail ou telefone"
-          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
-        >
-          <option value="todos">Todos os status</option>
-          <option value="ativo">Ativo</option>
-          <option value="pausado">Pausado</option>
-        </select>
-      </div>
-
-      <DataTable
-        sort={sort}
-        onSort={toggle}
-        columns={[
-          { label: "Cliente", sortKey: "nome" },
-          { label: "Contato", sortKey: "email" },
-          { label: "Cidade/UF", sortKey: "cidade" },
-          { label: "Última compra", sortKey: "ultima" },
-          { label: "Total investido", sortKey: "total" },
-          { label: "Status", sortKey: "status" },
-          "",
+    <AdminShell eyebrow="Loja" title="Cadastro de clientes">
+      <CrudManager
+        entity="Cliente"
+        table="clientes"
+        rpc="list_clientes"
+        bucket="clientes"
+        imageKey="imagem_url"
+        multiImage
+        readOnly={readOnly}
+        searchPlaceholder="Buscar por nome, e-mail ou telefone"
+        searchKeys={["nome", "email", "telefone", "cpf"]}
+        statusKey="status"
+        statusOptions={[
+          { value: "ativo", label: "Ativo" },
+          { value: "pausado", label: "Pausado" },
+          { value: "inativo", label: "Inativo" },
         ]}
-      >
-        {visible.map((r) => (
-          <tr key={r.email} className="hover:bg-secondary/40">
-            <td className="px-6 py-4 font-serif text-base text-foreground">{r.nome}</td>
-            <td className="px-6 py-4 text-muted-foreground">
-              <div>{r.email}</div>
-              <div className="text-xs">{r.tel}</div>
-            </td>
-            <td className="px-6 py-4 text-muted-foreground">{r.cidade}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.ultima}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.total}</td>
-            <td className="px-6 py-4"><StatusPill status={r.status} /></td>
-            <td className="px-6 py-4 text-right">
-              <button className="text-[10px] uppercase tracking-[0.28em] text-accent hover:text-foreground">
-                {readOnly ? "Ver" : "Editar"}
-              </button>
-            </td>
-          </tr>
-        ))}
-      </DataTable>
+        defaultSort={{ key: "nome", dir: "asc" }}
+        templateBase="clientes-template"
+        numericColumns={["total_pedidos", "valor_total_gasto"]}
+        templateColumns={[
+          "nome",
+          "cpf",
+          "email",
+          "telefone",
+          "data_nascimento",
+          "endereco",
+          "cidade",
+          "estado",
+          "cep",
+          "status",
+          "observacoes",
+        ]}
+        columns={[
+          { key: "nome", label: "Cliente", render: (r) => <span className="font-serif text-base text-foreground">{r.nome}</span> },
+          {
+            key: "email",
+            label: "Contato",
+            render: (r) => (
+              <div>
+                <div>{r.email ?? "—"}</div>
+                <div className="text-xs">{r.telefone ?? ""}</div>
+              </div>
+            ),
+          },
+          { key: "cidade", label: "Cidade/UF", render: (r) => [r.cidade, r.estado].filter(Boolean).join(" · ") || "—" },
+          { key: "total_pedidos", label: "Pedidos" },
+          { key: "valor_total_gasto", label: "Total investido", render: (r) => brl(r.valor_total_gasto) },
+          { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
+        ]}
+        fields={[
+          { name: "nome", label: "Nome" },
+          { name: "cpf", label: "CPF" },
+          { name: "email", label: "E-mail", type: "email" },
+          { name: "telefone", label: "Telefone", type: "tel" },
+          { name: "data_nascimento", label: "Nascimento", type: "date" },
+          { name: "endereco", label: "Endereço" },
+          { name: "cidade", label: "Cidade" },
+          { name: "estado", label: "UF" },
+          { name: "cep", label: "CEP" },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+              { value: "ativo", label: "Ativo" },
+              { value: "pausado", label: "Pausado" },
+              { value: "inativo", label: "Inativo" },
+            ],
+          },
+          { name: "observacoes", label: "Observações", type: "textarea" },
+        ]}
+      />
     </AdminShell>
   );
 }

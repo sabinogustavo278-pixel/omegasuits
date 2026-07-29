@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { CadastroActions } from "@/components/admin/CadastroActions";
-import { DataTable, StatusPill } from "@/components/admin/DataTable";
-import { useTableSort } from "@/hooks/use-table-sort";
+import { CrudManager } from "@/components/admin/CrudManager";
+import { StatusPill } from "@/components/admin/DataTable";
+import { callRpc } from "@/lib/db";
 
 export const Route = createFileRoute("/categorias")({
   head: () => ({
@@ -16,96 +16,55 @@ export const Route = createFileRoute("/categorias")({
   component: CategoriasPage,
 });
 
-const rows = [
-  { nome: "Ternos", pai: "—", slug: "/ternos", produtos: 14, status: "Publicado" },
-  { nome: "Ternos · Marinho", pai: "Ternos", slug: "/ternos/marinho", produtos: 6, status: "Publicado" },
-  { nome: "Ternos · Grafite", pai: "Ternos", slug: "/ternos/grafite", produtos: 5, status: "Publicado" },
-  { nome: "Camisaria", pai: "—", slug: "/camisaria", produtos: 22, status: "Publicado" },
-  { nome: "Calçados", pai: "—", slug: "/calcados", produtos: 9, status: "Publicado" },
-  { nome: "Acessórios", pai: "—", slug: "/acessorios", produtos: 31, status: "Publicado" },
-  { nome: "Acessórios · Gravatas", pai: "Acessórios", slug: "/acessorios/gravatas", produtos: 12, status: "Publicado" },
-  { nome: "Acessórios · Cintos", pai: "Acessórios", slug: "/acessorios/cintos", produtos: 8, status: "Rascunho" },
-];
-
 function CategoriasPage() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
-        if (search) return r.nome.toLowerCase().includes(search.toLowerCase());
-        return true;
-      }),
-    [search, status],
-  );
-  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "nome", dir: "asc" });
+  const { data: cats } = useQuery({ queryKey: ["list_categorias"], queryFn: () => callRpc("list_categorias") });
+  const options = (cats ?? []).map((c) => ({ value: String(c.id), label: String(c.nome) }));
 
   return (
-    <AdminShell
-      eyebrow="Loja"
-      title="Categorias"
-      actions={
-        <CadastroActions
-          entity="Categoria"
-          templateName="categorias-template.csv"
-          templateColumns={["nome", "categoria_pai", "slug", "descricao", "ordem"]}
-          formFields={[
-            { name: "nome", label: "Nome" },
-            { name: "pai", label: "Categoria pai" },
-            { name: "slug", label: "Slug" },
-            { name: "descricao", label: "Descrição", type: "textarea" },
-          ]}
-        />
-
-      }
-    >
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nome"
-          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
-        >
-          <option value="todos">Todos os status</option>
-          <option value="publicado">Publicado</option>
-          <option value="rascunho">Rascunho</option>
-        </select>
-      </div>
-
-      <DataTable
-        sort={sort}
-        onSort={toggle}
-        columns={[
-          { label: "Nome", sortKey: "nome" },
-          { label: "Categoria pai", sortKey: "pai" },
-          { label: "Slug", sortKey: "slug" },
-          { label: "Produtos", sortKey: "produtos" },
-          { label: "Status", sortKey: "status" },
-          "",
+    <AdminShell eyebrow="Loja" title="Categorias">
+      <CrudManager
+        entity="Categoria"
+        table="categorias"
+        rpc="list_categorias"
+        bucket="categorias"
+        imageKey="imagem_url"
+        multiImage
+        searchPlaceholder="Buscar por nome ou slug"
+        searchKeys={["nome", "slug", "categoria_pai"]}
+        statusKey="status"
+        statusOptions={[
+          { value: "publicado", label: "Publicado" },
+          { value: "rascunho", label: "Rascunho" },
         ]}
-      >
-        {visible.map((r) => (
-          <tr key={r.slug} className="hover:bg-secondary/40">
-            <td className="px-6 py-4 font-serif text-base text-foreground">{r.nome}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.pai}</td>
-            <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{r.slug}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.produtos}</td>
-            <td className="px-6 py-4"><StatusPill status={r.status} /></td>
-            <td className="px-6 py-4 text-right">
-              <button className="text-[10px] uppercase tracking-[0.28em] text-accent hover:text-foreground">
-                Editar
-              </button>
-            </td>
-          </tr>
-        ))}
-      </DataTable>
+        defaultSort={{ key: "nome", dir: "asc" }}
+        templateBase="categorias-template"
+        numericColumns={["ordem"]}
+        templateColumns={["nome", "slug", "descricao", "ordem", "status"]}
+        columns={[
+          { key: "nome", label: "Nome", render: (r) => <span className="font-serif text-base text-foreground">{r.nome}</span> },
+          { key: "categoria_pai", label: "Categoria pai" },
+          { key: "slug", label: "Slug", render: (r) => <span className="font-mono text-xs">{r.slug ?? "—"}</span> },
+          { key: "total_produtos", label: "Produtos" },
+          { key: "ordem", label: "Ordem" },
+          { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
+        ]}
+        fields={[
+          { name: "nome", label: "Nome" },
+          { name: "slug", label: "Slug" },
+          { name: "categoria_pai_id", label: "Categoria pai", type: "select", options },
+          { name: "ordem", label: "Ordem", type: "number" },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+              { value: "publicado", label: "Publicado" },
+              { value: "rascunho", label: "Rascunho" },
+            ],
+          },
+          { name: "descricao", label: "Descrição", type: "textarea" },
+        ]}
+      />
     </AdminShell>
   );
 }

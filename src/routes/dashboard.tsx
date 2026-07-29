@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { StatCard } from "@/components/admin/DataTable";
+import { callRpc } from "@/lib/db";
+import { formatPrice } from "@/data/products";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -27,13 +30,30 @@ const shortcuts = [
 ] as const;
 
 function DashboardPage() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["dashboard_metrics"],
+    queryFn: () => callRpc("dashboard_metrics"),
+  });
+  const m = (data?.[0] ?? {}) as Record<string, number>;
+  const v = (k: string) => (isLoading ? "…" : isError ? "—" : String(m[k] ?? 0));
+
   return (
     <AdminShell eyebrow="Painel" title="Visão geral do ateliê">
       <div className="grid gap-6 md:grid-cols-3">
-        <StatCard label="Fornecedores ativos" value="18" hint="+2 no mês" />
-        <StatCard label="Pedidos em aberto" value="6" hint="R$ 148.900" />
-        <StatCard label="SKUs em ruptura" value="3" hint="Ação imediata" />
+        <StatCard label="Produtos cadastrados" value={v("total_produtos")} hint={`${v("total_clientes")} clientes`} />
+        <StatCard
+          label="Pedidos de compra em aberto"
+          value={v("pedidos_compra_abertos")}
+          hint={isLoading ? undefined : formatPrice(Number(m.valor_compras_abertas ?? 0))}
+        />
+        <StatCard label="SKUs em ruptura" value={v("skus_ruptura")} hint={`${v("skus_criticos")} críticos`} />
       </div>
+
+      {isError ? (
+        <p className="mt-6 border border-border bg-background px-6 py-4 text-sm text-muted-foreground">
+          Entre com um usuário Administrador ou Gerente para visualizar os indicadores.
+        </p>
+      ) : null}
 
       <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {shortcuts.map((s) => (
