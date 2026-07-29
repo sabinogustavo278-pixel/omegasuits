@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { CadastroActions } from "@/components/admin/CadastroActions";
-import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
-import { useTableSort } from "@/hooks/use-table-sort";
+import { CrudManager, type Rec } from "@/components/admin/CrudManager";
+import { StatCard, StatusPill } from "@/components/admin/DataTable";
+import { callRpc } from "@/lib/db";
 import { formatPrice } from "@/data/products";
 
 export const Route = createFileRoute("/fornecedores/pedido")({
@@ -17,107 +17,102 @@ export const Route = createFileRoute("/fornecedores/pedido")({
   component: PedidosPage,
 });
 
-const rows = [
-  { n: "PC-2025-0142", forn: "Vitali Tecidos S/A", emissao: "05 Set 2025", previsao: "22 Set 2025", itens: 12, total: 62400, status: "Enviado" },
-  { n: "PC-2025-0141", forn: "Como Silks SRL", emissao: "02 Set 2025", previsao: "30 Set 2025", itens: 4, total: 28900, status: "Rascunho" },
-  { n: "PC-2025-0140", forn: "Northampton Leather", emissao: "28 Ago 2025", previsao: "10 Set 2025", itens: 8, total: 41800, status: "Recebido" },
-  { n: "PC-2025-0139", forn: "Fio Nobre Algodões", emissao: "20 Ago 2025", previsao: "05 Set 2025", itens: 22, total: 15800, status: "Recebido" },
-];
+const ABERTOS = ["rascunho", "enviado", "aprovado"];
 
 function PedidosPage() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
-        if (search) {
-          const q = search.toLowerCase();
-          return r.n.toLowerCase().includes(q) || r.forn.toLowerCase().includes(q);
-        }
-        return true;
-      }),
-    [search, status],
-  );
-  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "n", dir: "desc" });
+  const { data: forns } = useQuery({ queryKey: ["list_fornecedores"], queryFn: () => callRpc("list_fornecedores") });
 
   return (
-    <AdminShell
-      eyebrow="Fornecedores"
-      title="Pedidos de compra"
-      actions={
-        <CadastroActions
-          entity="Pedido"
-          templateName="pedidos-compra-template.csv"
-          templateColumns={["numero", "fornecedor_cnpj", "data_emissao", "data_previsao", "sku", "quantidade", "custo_unitario"]}
-          withImage={false}
-          formFields={[
-            { name: "fornecedor", label: "Fornecedor" },
-            { name: "emissao", label: "Data de emissão" },
-            { name: "previsao", label: "Previsão de entrega" },
-            { name: "observacao", label: "Observação", type: "textarea" },
-          ]}
-        />
-
-      }
-    >
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
-        <StatCard label="Em aberto" value="6" hint="R$ 148.900" />
-        <StatCard label="Recebidos no mês" value="9" hint="Setembro" />
-        <StatCard label="Ticket médio" value="R$ 24.500" />
-      </div>
-
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por número ou fornecedor"
-          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
-        >
-          <option value="todos">Todos os status</option>
-          <option value="rascunho">Rascunho</option>
-          <option value="enviado">Enviado</option>
-          <option value="recebido">Recebido</option>
-        </select>
-      </div>
-
-      <DataTable
-        sort={sort}
-        onSort={toggle}
-        columns={[
-          { label: "Nº", sortKey: "n" },
-          { label: "Fornecedor", sortKey: "forn" },
-          { label: "Emissão", sortKey: "emissao" },
-          { label: "Previsão", sortKey: "previsao" },
-          { label: "Itens", sortKey: "itens" },
-          { label: "Total", sortKey: "total" },
-          { label: "Status", sortKey: "status" },
-          "",
+    <AdminShell eyebrow="Fornecedores" title="Pedidos de compra">
+      <CrudManager
+        entity="Pedido"
+        table="pedidos_compra"
+        rpc="list_pedidos_compra"
+        searchPlaceholder="Buscar por número ou fornecedor"
+        searchKeys={["numero", "fornecedor", "status"]}
+        statusKey="status"
+        statusOptions={[
+          { value: "rascunho", label: "Rascunho" },
+          { value: "enviado", label: "Enviado" },
+          { value: "aprovado", label: "Aprovado" },
+          { value: "recebido", label: "Recebido" },
+          { value: "cancelado", label: "Cancelado" },
         ]}
-      >
-        {visible.map((r) => (
-          <tr key={r.n} className="hover:bg-secondary/40">
-            <td className="px-6 py-4 text-[11px] uppercase tracking-[0.25em] text-accent">{r.n}</td>
-            <td className="px-6 py-4 font-serif text-base text-foreground">{r.forn}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.emissao}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.previsao}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.itens}</td>
-            <td className="px-6 py-4 text-foreground">{formatPrice(r.total)}</td>
-            <td className="px-6 py-4"><StatusPill status={r.status} /></td>
-            <td className="px-6 py-4 text-right">
-              <button className="text-[10px] uppercase tracking-[0.28em] text-accent hover:text-foreground">
-                Abrir
-              </button>
-            </td>
-          </tr>
-        ))}
-      </DataTable>
+        defaultSort={{ key: "numero", dir: "desc" }}
+        templateBase="pedidos-compra-template"
+        numericColumns={["valor_total"]}
+        templateColumns={[
+          "numero",
+          "data_pedido",
+          "data_entrega_prevista",
+          "status",
+          "valor_total",
+          "condicao_pagamento",
+          "observacoes",
+        ]}
+        stats={(rows: Rec[]) => {
+          const abertos = rows.filter((r) => ABERTOS.includes(String(r.status)));
+          const total = abertos.reduce((s, r) => s + Number(r.valor_total ?? 0), 0);
+          const recebidos = rows.filter((r) => r.status === "recebido");
+          return (
+            <div className="grid gap-4 md:grid-cols-3">
+              <StatCard label="Em aberto" value={String(abertos.length)} hint={formatPrice(total)} />
+              <StatCard label="Recebidos" value={String(recebidos.length)} />
+              <StatCard
+                label="Ticket médio"
+                value={rows.length ? formatPrice(rows.reduce((s, r) => s + Number(r.valor_total ?? 0), 0) / rows.length) : "—"}
+              />
+            </div>
+          );
+        }}
+        columns={[
+          { key: "numero", label: "Nº", render: (r) => <span className="text-[11px] uppercase tracking-[0.25em] text-accent">{r.numero ?? "—"}</span> },
+          { key: "fornecedor", label: "Fornecedor", render: (r) => <span className="font-serif text-base text-foreground">{r.fornecedor ?? "—"}</span> },
+          {
+            key: "data_pedido",
+            label: "Emissão",
+            render: (r) => (r.data_pedido ? new Date(`${r.data_pedido}T00:00:00`).toLocaleDateString("pt-BR") : "—"),
+          },
+          {
+            key: "data_entrega_prevista",
+            label: "Previsão",
+            render: (r) =>
+              r.data_entrega_prevista
+                ? new Date(`${r.data_entrega_prevista}T00:00:00`).toLocaleDateString("pt-BR")
+                : "—",
+          },
+          { key: "total_itens", label: "Itens" },
+          { key: "valor_total", label: "Total", render: (r) => (r.valor_total == null ? "—" : formatPrice(Number(r.valor_total))) },
+          { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
+        ]}
+        fields={[
+          { name: "numero", label: "Número" },
+          {
+            name: "fornecedor_id",
+            label: "Fornecedor",
+            type: "select",
+            options: (forns ?? []).map((f) => ({ value: String(f.id), label: String(f.razao_social) })),
+          },
+          { name: "data_pedido", label: "Data do pedido", type: "date" },
+          { name: "data_entrega_prevista", label: "Previsão de entrega", type: "date" },
+          { name: "data_entrega_real", label: "Entrega real", type: "date" },
+          {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+              { value: "rascunho", label: "Rascunho" },
+              { value: "enviado", label: "Enviado" },
+              { value: "aprovado", label: "Aprovado" },
+              { value: "recebido", label: "Recebido" },
+              { value: "cancelado", label: "Cancelado" },
+            ],
+          },
+          { name: "valor_total", label: "Valor total (R$)", type: "number" },
+          { name: "condicao_pagamento", label: "Condição de pagamento" },
+          { name: "observacoes", label: "Observações", type: "textarea" },
+        ]}
+      />
     </AdminShell>
   );
 }

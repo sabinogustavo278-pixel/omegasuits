@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { CadastroActions } from "@/components/admin/CadastroActions";
-import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
-import { useTableSort } from "@/hooks/use-table-sort";
+import { CrudManager, type Rec } from "@/components/admin/CrudManager";
+import { StatCard, StatusPill } from "@/components/admin/DataTable";
+import { callRpc } from "@/lib/db";
 
 export const Route = createFileRoute("/estoque")({
   head: () => ({
@@ -16,106 +16,78 @@ export const Route = createFileRoute("/estoque")({
   component: EstoquePage,
 });
 
-const rows = [
-  { sku: "TRN-MAR-001", produto: "Terno Marinho Clássico", deposito: "Ateliê SP", saldo: 8, reservado: 2, disp: 6, ult: "05 Set 2025", status: "OK" },
-  { sku: "CAL-OXF-014", produto: "Sapato Oxford Havana", deposito: "CD Barueri", saldo: 12, reservado: 3, disp: 9, ult: "02 Set 2025", status: "OK" },
-  { sku: "ACS-GRV-088", produto: "Gravata de Seda Marinho", deposito: "Ateliê SP", saldo: 24, reservado: 0, disp: 24, ult: "01 Set 2025", status: "OK" },
-  { sku: "CAM-ALV-002", produto: "Camisa Social Alvo", deposito: "CD Barueri", saldo: 0, reservado: 0, disp: 0, ult: "29 Ago 2025", status: "Ruptura" },
-  { sku: "ACS-CNT-041", produto: "Cinto Couro Marrom", deposito: "Ateliê SP", saldo: 3, reservado: 1, disp: 2, ult: "27 Ago 2025", status: "Crítico" },
-  { sku: "ACS-ABT-019", produto: "Abotoaduras em Prata", deposito: "Cofre", saldo: 6, reservado: 0, disp: 6, ult: "20 Ago 2025", status: "OK" },
-];
-
 function EstoquePage() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("todos");
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (status !== "todos" && r.status.toLowerCase() !== status) return false;
-        if (search) {
-          const q = search.toLowerCase();
-          return r.sku.toLowerCase().includes(q) || r.produto.toLowerCase().includes(q);
-        }
-        return true;
-      }),
-    [search, status],
-  );
-  const { rows: visible, sort, toggle } = useTableSort(filtered, { key: "sku", dir: "asc" });
+  const { data: produtos } = useQuery({ queryKey: ["list_produtos"], queryFn: () => callRpc("list_produtos") });
 
   return (
-    <AdminShell
-      eyebrow="Loja"
-      title="Estoque"
-      actions={
-        <CadastroActions
-          entity="Movimentação"
-          templateName="estoque-template.csv"
-          templateColumns={["sku", "deposito", "tipo", "quantidade", "custo_unitario", "data", "observacao"]}
-          withImage={false}
-          formFields={[
-            { name: "sku", label: "SKU" },
-            { name: "deposito", label: "Depósito" },
-            { name: "tipo", label: "Tipo (entrada/saída)" },
-            { name: "quantidade", label: "Quantidade" },
-            { name: "observacao", label: "Observação", type: "textarea" },
-          ]}
-        />
-
-      }
-    >
-      <div className="mb-8 grid gap-4 md:grid-cols-3">
-        <StatCard label="Total em peças" value="53" hint="6 SKUs" />
-        <StatCard label="SKUs críticos" value="1" hint="Reposição sugerida" />
-        <StatCard label="Rupturas" value="1" hint="Ação imediata" />
-      </div>
-
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por SKU ou produto"
-          className="w-full max-w-md border border-border bg-background px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-foreground md:w-96"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border border-border bg-background px-4 py-3 text-sm text-muted-foreground outline-none focus:border-foreground"
-        >
-          <option value="todos">Todos os status</option>
-          <option value="ok">OK</option>
-          <option value="crítico">Crítico</option>
-          <option value="ruptura">Ruptura</option>
-        </select>
-      </div>
-
-      <DataTable
-        sort={sort}
-        onSort={toggle}
-        columns={[
-          { label: "SKU", sortKey: "sku" },
-          { label: "Produto", sortKey: "produto" },
-          { label: "Depósito", sortKey: "deposito" },
-          { label: "Saldo", sortKey: "saldo" },
-          { label: "Reservado", sortKey: "reservado" },
-          { label: "Disponível", sortKey: "disp" },
-          { label: "Última mov.", sortKey: "ult" },
-          { label: "Status", sortKey: "status" },
+    <AdminShell eyebrow="Loja" title="Estoque">
+      <CrudManager
+        entity="Saldo"
+        table="estoque"
+        rpc="list_estoque"
+        imageKey="imagem_url"
+        searchPlaceholder="Buscar por SKU, produto ou localização"
+        searchKeys={["sku", "produto", "localizacao"]}
+        statusKey="situacao"
+        statusOptions={[
+          { value: "ok", label: "OK" },
+          { value: "crítico", label: "Crítico" },
+          { value: "ruptura", label: "Ruptura" },
         ]}
-      >
-        {visible.map((r) => (
-          <tr key={r.sku} className="hover:bg-secondary/40">
-            <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{r.sku}</td>
-            <td className="px-6 py-4 font-serif text-base text-foreground">{r.produto}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.deposito}</td>
-            <td className="px-6 py-4 text-foreground">{r.saldo}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.reservado}</td>
-            <td className="px-6 py-4 text-foreground">{r.disp}</td>
-            <td className="px-6 py-4 text-muted-foreground">{r.ult}</td>
-            <td className="px-6 py-4"><StatusPill status={r.status} /></td>
-          </tr>
-        ))}
-      </DataTable>
+        defaultSort={{ key: "produto", dir: "asc" }}
+        templateBase="estoque-template"
+        numericColumns={["quantidade", "quantidade_minima"]}
+        templateColumns={["produto_id", "quantidade", "quantidade_minima", "localizacao"]}
+        stats={(rows: Rec[]) => (
+          <div className="grid gap-4 md:grid-cols-3">
+            <StatCard
+              label="Total em peças"
+              value={String(rows.reduce((s, r) => s + Number(r.quantidade ?? 0), 0))}
+              hint={`${rows.length} SKUs`}
+            />
+            <StatCard
+              label="SKUs críticos"
+              value={String(rows.filter((r) => r.situacao === "Crítico").length)}
+              hint="Reposição sugerida"
+            />
+            <StatCard
+              label="Rupturas"
+              value={String(rows.filter((r) => r.situacao === "Ruptura").length)}
+              hint="Ação imediata"
+            />
+          </div>
+        )}
+        columns={[
+          { key: "sku", label: "SKU", render: (r) => <span className="font-mono text-xs">{r.sku ?? "—"}</span> },
+          { key: "produto", label: "Produto", render: (r) => <span className="font-serif text-base text-foreground">{r.produto ?? "—"}</span> },
+          { key: "localizacao", label: "Localização" },
+          { key: "quantidade", label: "Saldo" },
+          { key: "quantidade_minima", label: "Mínimo" },
+          {
+            key: "ultima_movimentacao",
+            label: "Última mov.",
+            render: (r) =>
+              r.ultima_movimentacao
+                ? new Date(String(r.ultima_movimentacao)).toLocaleDateString("pt-BR")
+                : "—",
+          },
+          { key: "situacao", label: "Situação", render: (r) => <StatusPill status={String(r.situacao)} /> },
+        ]}
+        fields={[
+          {
+            name: "produto_id",
+            label: "Produto",
+            type: "select",
+            options: (produtos ?? []).map((p) => ({
+              value: String(p.id),
+              label: `${p.sku ? `${p.sku} · ` : ""}${p.nome}`,
+            })),
+          },
+          { name: "quantidade", label: "Quantidade", type: "number" },
+          { name: "quantidade_minima", label: "Quantidade mínima", type: "number" },
+          { name: "localizacao", label: "Localização" },
+        ]}
+      />
     </AdminShell>
   );
 }

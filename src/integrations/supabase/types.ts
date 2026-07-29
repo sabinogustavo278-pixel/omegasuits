@@ -720,11 +720,190 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dashboard_metrics: {
+        Args: never
+        Returns: {
+          pedidos_compra_abertos: number
+          pedidos_venda_pendentes: number
+          skus_criticos: number
+          skus_ruptura: number
+          total_clientes: number
+          total_fornecedores: number
+          total_produtos: number
+          valor_compras_abertas: number
+        }[]
+      }
       has_profile: {
         Args: { _profile_name: string; _user_id: string }
         Returns: boolean
       }
       is_admin_or_gerente: { Args: never; Returns: boolean }
+      list_categorias: {
+        Args: never
+        Returns: {
+          categoria_pai: string
+          categoria_pai_id: string
+          created_at: string
+          descricao: string
+          id: string
+          imagem_url: string
+          nome: string
+          ordem: number
+          slug: string
+          status: string
+          total_produtos: number
+        }[]
+      }
+      list_clientes: {
+        Args: never
+        Returns: {
+          cep: string | null
+          cidade: string | null
+          cpf: string | null
+          created_at: string
+          data_nascimento: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          imagem_url: string | null
+          nome: string
+          observacoes: string | null
+          status: string
+          telefone: string | null
+          total_pedidos: number
+          ultima_compra: string | null
+          updated_at: string
+          valor_total_gasto: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "clientes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      list_estoque: {
+        Args: never
+        Returns: {
+          id: string
+          imagem_url: string
+          localizacao: string
+          produto: string
+          produto_id: string
+          quantidade: number
+          quantidade_minima: number
+          situacao: string
+          sku: string
+          ultima_movimentacao: string
+        }[]
+      }
+      list_fornecedores: {
+        Args: never
+        Returns: {
+          categoria: string | null
+          cep: string | null
+          cidade: string | null
+          cnpj: string
+          contato_nome: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          imagem_url: string | null
+          inscricao_estadual: string | null
+          nome_fantasia: string | null
+          observacoes: string | null
+          razao_social: string
+          status: string
+          telefone: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "fornecedores"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      list_pedidos_compra: {
+        Args: never
+        Returns: {
+          condicao_pagamento: string
+          created_at: string
+          data_entrega_prevista: string
+          data_entrega_real: string
+          data_pedido: string
+          fornecedor: string
+          fornecedor_id: string
+          id: string
+          numero: string
+          observacoes: string
+          status: string
+          total_itens: number
+          valor_total: number
+        }[]
+      }
+      list_pedidos_venda: {
+        Args: never
+        Returns: {
+          cliente: string
+          cliente_id: string
+          data_pedido: string
+          desconto: number
+          frete: number
+          id: string
+          metodo_pagamento: string
+          numero: string
+          status: string
+          subtotal: number
+          total_itens: number
+          valor_total: number
+        }[]
+      }
+      list_produto_imagens: {
+        Args: { _produto_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          imagem_url: string
+          ordem: number
+          produto_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "produtos_imagens"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      list_produtos: {
+        Args: never
+        Returns: {
+          categoria: string
+          categoria_id: string
+          cor: string
+          created_at: string
+          custo: number
+          descricao: string
+          destaque: boolean
+          estoque: number
+          fornecedor: string
+          fornecedor_id: string
+          id: string
+          imagem_url: string
+          material: string
+          nome: string
+          peso: number
+          preco: number
+          preco_promocional: number
+          sku: string
+          status: string
+          tamanho: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

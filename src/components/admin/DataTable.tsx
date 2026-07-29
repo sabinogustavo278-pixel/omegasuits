@@ -61,6 +61,17 @@ export function DataTable({
   );
 }
 
+export function Thumb({ src, alt }: { src?: string | null; alt: string }) {
+  if (!src) {
+    return (
+      <div className="flex h-12 w-12 items-center justify-center border border-border bg-secondary/60 text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+        —
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} loading="lazy" className="h-12 w-12 border border-border object-cover" />;
+}
+
 export function StatusPill({ status }: { status: string }) {
   const s = status.toLowerCase();
   const tone =
@@ -68,7 +79,7 @@ export function StatusPill({ status }: { status: string }) {
       ? "text-emerald-700 bg-emerald-500/10 border-emerald-600/30"
       : s.includes("rascunho") || s.includes("pausado")
         ? "text-muted-foreground bg-muted border-border"
-        : s.includes("crítico") || s.includes("ruptura") || s.includes("bloqueado")
+        : s.includes("crítico") || s.includes("critico") || s.includes("ruptura") || s.includes("bloqueado") || s.includes("cancelado")
           ? "text-red-700 bg-red-500/10 border-red-600/30"
           : "text-accent bg-accent/10 border-accent/40";
   return (
