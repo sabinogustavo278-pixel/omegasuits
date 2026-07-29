@@ -19,8 +19,8 @@ export function useCatalog(category?: ProductCategory) {
     retry: false,
   });
 
-  const mapped: Product[] = (query.data ?? [])
-    .map((r) => {
+  const mapped = (query.data ?? [])
+    .map((r): Product | null => {
       const cat = slugToCategory(r.categoria_slug) ?? slugToCategory(r.categoria);
       if (!cat) return null;
       return {
@@ -31,9 +31,10 @@ export function useCatalog(category?: ProductCategory) {
         price: Number(r.preco_promocional ?? r.preco ?? 0),
         image: String(r.imagem_url ?? ""),
         tagline: (r.descricao as string | null) ?? undefined,
-      } satisfies Product;
+      };
     })
     .filter((p): p is Product => p !== null && Boolean(p.image));
+
 
   const source = mapped.length > 0 ? mapped : fallback;
   const items = category ? source.filter((p) => p.category === category) : source;
