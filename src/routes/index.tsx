@@ -3,13 +3,15 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductCard } from "@/components/ProductCard";
-import { products } from "@/data/products";
+import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
 function Home() {
+  const { items } = useCatalog();
+
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
