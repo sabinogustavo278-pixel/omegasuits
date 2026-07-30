@@ -40,6 +40,7 @@ function ProdutosPage() {
         ]}
         defaultSort={{ key: "nome", dir: "asc" }}
         templateBase="produtos-template"
+        importKey="sku"
         numericColumns={["preco", "preco_promocional", "custo", "peso"]}
         templateColumns={[
           "sku",
@@ -76,7 +77,7 @@ function ProdutosPage() {
         ]}
         fields={[
           { name: "sku", label: "SKU" },
-          { name: "nome", label: "Nome" },
+          { name: "nome", label: "Nome", required: true },
           {
             name: "categoria_id",
             label: "Categoria",
@@ -87,9 +88,10 @@ function ProdutosPage() {
             name: "fornecedor_id",
             label: "Fornecedor",
             type: "select",
+            required: true,
             options: (forns ?? []).map((f) => ({ value: String(f.id), label: String(f.razao_social) })),
           },
-          { name: "preco", label: "Preço (R$)", type: "number" },
+          { name: "preco", label: "Preço (R$)", type: "number", required: true },
           { name: "preco_promocional", label: "Preço promocional (R$)", type: "number" },
           { name: "custo", label: "Custo (R$)", type: "number" },
           { name: "peso", label: "Peso (kg)", type: "number" },

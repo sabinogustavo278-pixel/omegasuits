@@ -42,6 +42,7 @@ function ClientesPage() {
         ]}
         defaultSort={{ key: "nome", dir: "asc" }}
         templateBase="clientes-template"
+        importKey="email"
         numericColumns={["total_pedidos", "valor_total_gasto"]}
         templateColumns={[
           "nome",
@@ -74,7 +75,7 @@ function ClientesPage() {
           { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
         ]}
         fields={[
-          { name: "nome", label: "Nome" },
+          { name: "nome", label: "Nome", required: true },
           { name: "cpf", label: "CPF" },
           { name: "email", label: "E-mail", type: "email" },
           { name: "telefone", label: "Telefone", type: "tel" },

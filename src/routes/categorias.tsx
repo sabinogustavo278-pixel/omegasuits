@@ -38,6 +38,7 @@ function CategoriasPage() {
         ]}
         defaultSort={{ key: "nome", dir: "asc" }}
         templateBase="categorias-template"
+        importKey="slug"
         numericColumns={["ordem"]}
         templateColumns={["nome", "slug", "descricao", "ordem", "status"]}
         columns={[
@@ -49,7 +50,7 @@ function CategoriasPage() {
           { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
         ]}
         fields={[
-          { name: "nome", label: "Nome" },
+          { name: "nome", label: "Nome", required: true },
           { name: "slug", label: "Slug" },
           { name: "categoria_pai_id", label: "Categoria pai", type: "select", options },
           { name: "ordem", label: "Ordem", type: "number" },
