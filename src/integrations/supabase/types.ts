@@ -827,6 +827,21 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      list_pedidos_cliente: {
+        Args: never
+        Returns: {
+          data_pedido: string
+          desconto: number
+          frete: number
+          id: string
+          metodo_pagamento: string
+          numero: string
+          status: string
+          subtotal: number
+          total_itens: number
+          valor_total: number
+        }[]
+      }
       list_pedidos_compra: {
         Args: never
         Returns: {
