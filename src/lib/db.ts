@@ -113,3 +113,19 @@ export function friendlyError(err: unknown): string {
   if (/JWT|not authenticated/i.test(msg)) return "Sessão expirada. Faça login novamente.";
   return msg;
 }
+
+/** Insere um registro e devolve o id gerado. */
+export async function insertOne(name: TableName, values: Row): Promise<string> {
+  const client = supabase as unknown as {
+    from: (t: string) => {
+      insert: (v: Row) => {
+        select: (c: string) => {
+          single: () => Promise<{ data: Row | null; error: { message: string } | null }>;
+        };
+      };
+    };
+  };
+  const { data, error } = await client.from(name).insert(values).select("id").single();
+  if (error) throw new Error(error.message);
+  return String(data?.id ?? "");
+}
