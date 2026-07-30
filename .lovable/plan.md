@@ -1,43 +1,56 @@
-## Objetivo
+## 1. Rota /fornecedores/pedido (causa confirmada)
 
-Substituir os dados mockados das telas de gestão por dados reais do Supabase (11 tabelas) e ligar o upload de imagens aos 4 buckets públicos (`fornecedores`, `produtos`, `categorias`, `clientes`).
+No roteamento atual, `fornecedores.pedido.tsx` fica **aninhada** dentro de `fornecedores.tsx`, e a página de Fornecedores não renderiza `<Outlet />` — por isso a URL de pedido mostra o cadastro de fornecedores.
 
-## Camada de dados
+Correção: transformar em rota irmã (`fornecedores_.pedido.tsx`) e reescrever a tela como um **Pedido de Compra** de verdade:
+- seleção de fornecedor via RPC `list_fornecedores`;
+- itens do pedido: escolher produto (via `list_produtos`), quantidade e preço unitário, com adicionar/remover linhas;
+- subtotal por item e valor total calculados na tela;
+- ao salvar: grava em `pedidos_compra` e os itens em `pedidos_compra_itens` (com `pedido_id`), atualizando `valor_total`;
+- lista dos pedidos existentes via `list_pedidos_compra`, com filtro, ordenação, edição e exclusão.
 
-- Criar `src/lib/crud.functions.ts` com server functions genéricas protegidas (`requireSupabaseAuth`) para listar, criar, atualizar e excluir registros (incluindo exclusão em lote), respeitando as policies Admin/Gerente já existentes.
-- Criar `src/lib/queries.ts` com `queryOptions` por entidade (categorias, produtos, estoque, movimentações, fornecedores, pedidos de compra + itens, pedidos de venda + itens, clientes, imagens de produto) e invalidações após cada mutação.
-- Rotas administrativas continuam públicas (sem auth guard, como definido antes); a leitura usa o cliente do browser e as gravações passam pelas server functions autenticadas — quem não estiver logado vê a lista mas recebe aviso ao gravar.
+## 2. Formulários em branco (Produtos, Clientes, Fornecedores, Categorias)
 
-## Upload de imagens
+O código do modal renderiza os campos, então a causa exata ainda **não está confirmada**. Primeiro passo: reproduzir clicando em "Novo" nas 4 telas e ler console/erros. Hipóteses a verificar, na ordem:
+- perfil ativo caindo em modo somente-leitura/gate, esvaziando o corpo do modal;
+- lista de campos dependente de RPCs (`list_categorias`/`list_fornecedores`) que falham sem sessão, deixando o formulário sem conteúdo útil;
+- erro de render dentro do modal derrubando a árvore.
 
-- Novo `src/lib/storage.ts`: comprime a imagem (reaproveitando `image-processing.ts`), envia ao bucket correspondente e devolve a URL pública para gravar em `imagem_url`.
-- Suporte a múltiplas imagens em Produtos, gravando as extras em `produtos_imagens` (com ordem).
+Depois de identificado, corrigir na origem e garantir que o modal sempre renderize os inputs, com estado de carregamento nos selects em vez de vazio.
 
-## Telas (padrão único, aplicado a todas as páginas de cadastro)
+## 3. Template e Importação
 
-Fornecedores, Fornecedores/Pedido, Categorias, Produtos, Estoque, Clientes:
+- Corrigir o download: anexar o link ao DOM antes do clique e liberar a URL depois, com fallback de abertura em nova aba (o preview em iframe pode bloquear downloads diretos).
+- Completar as colunas dos templates para refletirem **todas** as colunas gravável de cada tabela (incluindo vínculos como `categoria_id`, `fornecedor_id`, e campos de endereço em clientes/fornecedores).
+- Importação: ler CSV/XLSX, e em vez de apenas inserir, fazer **upsert** — se o registro já existe (chave natural: `sku` em produtos, `cnpj` em fornecedores, `cpf`/`email` em clientes, `slug`/`nome` em categorias), atualizar; se não, inserir. Mostrar resumo "X inseridos, Y atualizados" e erros por linha.
 
-- Lista real vinda do banco, com estados de carregando/vazio/erro.
-- Thumbnail da imagem em cada linha.
-- Ordenação por cabeçalho (mantida), filtros de busca e status.
-- Ações por linha: **Editar** (modal preenchido) e **Excluir** (com confirmação).
-- Checkbox por linha + seleção múltipla para exclusão em lote.
-- Botões **Template** (CSV **e XLSX**, colunas reais da tabela), **Importar** (lê CSV/XLSX e insere de verdade, com resumo de sucesso/erro) e **Novo** (grava no banco + upload de imagem).
+## 4. Validações mínimas nos cadastros
 
-## Componentes
+Marcar como obrigatórios apenas os essenciais e deixar o resto opcional:
+- Produtos: Nome, Preço, Fornecedor;
+- Clientes: Nome;
+- Fornecedores: Razão social, CNPJ;
+- Categorias: Nome.
+Campos obrigatórios recebem indicação visual e bloqueio de envio com mensagem clara.
 
-- `CadastroActions`: passa a receber colunas/handlers reais de gravação e importação; template ganha exportação XLSX (biblioteca `xlsx`).
-- `DataTable`: ganha coluna de seleção, barra de ações em massa e slot de ações por linha.
-- `Dashboard`: métricas calculadas a partir de contagens reais (produtos, clientes, pedidos, estoque crítico).
-- Vitrine da loja (`/`, `/ternos`, `/camisaria`, `/calcados`, `/acessorios`) passa a ler `produtos` publicados do banco, com fallback para as imagens locais quando o produto não tiver imagem.
+## 5. Cadastro sem confirmação de e-mail
+
+Habilitar auto-confirmação de e-mail na configuração do Auth do projeto e ajustar a tela de login para entrar direto após criar a conta (remover a mensagem "verifique seu e-mail" e o redirecionamento por link).
+
+## 6. Meu Perfil
+
+Nova rota `/meu-perfil`, com item no menu para usuários logados (header da loja e menu lateral do painel):
+- dados do usuário atual (nome, e-mail e avatar vindos do Auth/`user_profiles`);
+- seção de histórico de compras consultando `pedidos_venda` do cliente, via nova função SQL (RPC) que lista os pedidos com número, data, status, valor e quantidade de itens.
+
+A rota é registrada no gerenciamento de acessos com o perfil Administrador sempre ativo, e o menu lateral continua exibindo apenas rotas liberadas.
+
+## 7. Dados da Empresa
+
+Nova rota `/empresa` no painel (apenas visual, sem banco): formulário com Nome, CNPJ, Telefone e Endereço, no padrão da identidade (marinho/carvão/marfim, dourado, Cormorant + Inter), também registrada no gerenciamento de acessos e na sidebar.
 
 ## Detalhes técnicos
 
-- Server functions em `src/lib/*.functions.ts` (nunca em `src/server/`), lendo `process.env` dentro do handler.
-- Cache via TanStack Query; loaders usam `ensureQueryData` onde a rota já tiver loader.
-- Nenhuma alteração de schema é necessária — as tabelas, FKs, RLS e buckets já existem.
-
-## Fora de escopo
-
-- Checkout gravando pedidos reais (segue mockado até você pedir).
-- Relatórios e movimentação automática de estoque por pedido.
+- Nova migration apenas para a função SQL de histórico de compras do cliente (leitura via RPC, conforme a diretriz do projeto), com permissão para usuários autenticados.
+- Ajustes concentrados em `src/components/admin/CrudManager.tsx`, `src/lib/sheet.ts`, `src/lib/db.ts` (upsert), `src/lib/mock-roles.ts` (novas rotas na matriz), `src/components/admin/AdminShell.tsx`, `src/components/SiteHeader.tsx`.
+- Correção silenciosa do aviso de hidratação do contador da sacola no header.
