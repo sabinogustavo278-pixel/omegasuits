@@ -13,9 +13,11 @@ import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as TernosRouteImport } from './routes/ternos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PerfisRouteImport } from './routes/perfis'
+import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
 import { Route as EstoqueRouteImport } from './routes/estoque'
+import { Route as EmpresaRouteImport } from './routes/empresa'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ClientesRouteImport } from './routes/clientes'
@@ -48,6 +50,11 @@ const PerfisRoute = PerfisRouteImport.update({
   path: '/perfis',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeuPerfilRoute = MeuPerfilRouteImport.update({
+  id: '/meu-perfil',
+  path: '/meu-perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -61,6 +68,11 @@ const FornecedoresRoute = FornecedoresRouteImport.update({
 const EstoqueRoute = EstoqueRouteImport.update({
   id: '/estoque',
   path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresaRoute = EmpresaRouteImport.update({
+  id: '/empresa',
+  path: '/empresa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -130,9 +142,11 @@ export interface FileRoutesByFullPath {
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
+  '/empresa': typeof EmpresaRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
+  '/meu-perfil': typeof MeuPerfilRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
@@ -150,9 +164,11 @@ export interface FileRoutesByTo {
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
+  '/empresa': typeof EmpresaRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
+  '/meu-perfil': typeof MeuPerfilRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
@@ -171,9 +187,11 @@ export interface FileRoutesById {
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
+  '/empresa': typeof EmpresaRoute
   '/estoque': typeof EstoqueRoute
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
+  '/meu-perfil': typeof MeuPerfilRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
@@ -193,9 +211,11 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conta'
     | '/dashboard'
+    | '/empresa'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/meu-perfil'
     | '/perfis'
     | '/produtos'
     | '/ternos'
@@ -213,9 +233,11 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conta'
     | '/dashboard'
+    | '/empresa'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/meu-perfil'
     | '/perfis'
     | '/produtos'
     | '/ternos'
@@ -233,9 +255,11 @@ export interface FileRouteTypes {
     | '/clientes'
     | '/conta'
     | '/dashboard'
+    | '/empresa'
     | '/estoque'
     | '/fornecedores'
     | '/login'
+    | '/meu-perfil'
     | '/perfis'
     | '/produtos'
     | '/ternos'
@@ -254,9 +278,11 @@ export interface RootRouteChildren {
   ClientesRoute: typeof ClientesRoute
   ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
+  EmpresaRoute: typeof EmpresaRoute
   EstoqueRoute: typeof EstoqueRoute
   FornecedoresRoute: typeof FornecedoresRoute
   LoginRoute: typeof LoginRoute
+  MeuPerfilRoute: typeof MeuPerfilRoute
   PerfisRoute: typeof PerfisRoute
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
@@ -294,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfisRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meu-perfil': {
+      id: '/meu-perfil'
+      path: '/meu-perfil'
+      fullPath: '/meu-perfil'
+      preLoaderRoute: typeof MeuPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -313,6 +346,13 @@ declare module '@tanstack/react-router' {
       path: '/estoque'
       fullPath: '/estoque'
       preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresa': {
+      id: '/empresa'
+      path: '/empresa'
+      fullPath: '/empresa'
+      preLoaderRoute: typeof EmpresaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -406,9 +446,11 @@ const rootRouteChildren: RootRouteChildren = {
   ClientesRoute: ClientesRoute,
   ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
+  EmpresaRoute: EmpresaRoute,
   EstoqueRoute: EstoqueRoute,
   FornecedoresRoute: FornecedoresRoute,
   LoginRoute: LoginRoute,
+  MeuPerfilRoute: MeuPerfilRoute,
   PerfisRoute: PerfisRoute,
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,

@@ -63,12 +63,12 @@ export function SiteHeader() {
           </Link>
           {authed ? (
             <Link
-              to="/conta"
-              aria-label="Conta"
+              to="/meu-perfil"
+              aria-label="Meu perfil"
               className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
             >
               <User className="h-4 w-4" strokeWidth={1.25} />
-              <span className="hidden sm:inline">Conta</span>
+              <span className="hidden sm:inline">Meu perfil</span>
             </Link>
           ) : (
             <Link

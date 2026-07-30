@@ -22,6 +22,8 @@ export const ACCESS_MATRIX: Record<string, Record<Role, Access>> = {
   "/usuarios":             { admin: "full", gerente: "none", usuario: "none" },
   "/perfis":               { admin: "full", gerente: "none", usuario: "none" },
   "/acessos":              { admin: "full", gerente: "none", usuario: "none" },
+  "/empresa":              { admin: "full", gerente: "read", usuario: "none" },
+  "/meu-perfil":           { admin: "full", gerente: "full", usuario: "full" },
 };
 
 const KEY = "omega_role";
