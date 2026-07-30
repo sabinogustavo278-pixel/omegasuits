@@ -3,7 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Upload, Plus, X, ImagePlus, Pencil, Trash2 } from "lucide-react";
 import { DataTable, Thumb } from "./DataTable";
 import { useTableSort, type SortState } from "@/hooks/use-table-sort";
-import { callRpc, deleteRows, friendlyError, insertRows, updateRow, type TableName } from "@/lib/db";
+import {
+  callRpc,
+  deleteRows,
+  friendlyError,
+  insertRows,
+  updateRow,
+  upsertByKey,
+  type TableName,
+} from "@/lib/db";
 import { exportCsv, exportXlsx, parseSheet } from "@/lib/sheet";
 import { uploadImages, type BucketName } from "@/lib/storage";
 
@@ -14,6 +22,8 @@ export interface CrudField {
   label: string;
   type?: "text" | "number" | "email" | "tel" | "date" | "textarea" | "select";
   options?: Array<{ value: string; label: string }>;
+  /** Campos essenciais — o restante é opcional. */
+  required?: boolean;
 }
 
 export interface CrudColumn {
@@ -41,6 +51,8 @@ export interface CrudManagerProps {
   templateColumns: string[];
   templateBase: string;
   numericColumns?: string[];
+  /** Chave natural usada na importação para decidir entre inserir e atualizar. */
+  importKey?: string;
   defaultSort?: SortState;
   readOnly?: boolean;
   stats?: (rows: Rec[]) => ReactNode;

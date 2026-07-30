@@ -9,6 +9,7 @@ type RpcName =
   | "list_estoque"
   | "list_pedidos_compra"
   | "list_pedidos_venda"
+  | "list_pedidos_cliente"
   | "dashboard_metrics"
   | "list_produto_imagens";
 
