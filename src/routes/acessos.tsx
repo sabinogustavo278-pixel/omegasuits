@@ -25,6 +25,8 @@ const routeLabels: Record<string, string> = {
   "/usuarios": "Usuários · Cadastro",
   "/perfis": "Usuários · Perfis",
   "/acessos": "Usuários · Acessos",
+  "/empresa": "Configurações · Dados da empresa",
+  "/meu-perfil": "Conta · Meu perfil",
 };
 
 function AccessCell({ level }: { level: Access }) {

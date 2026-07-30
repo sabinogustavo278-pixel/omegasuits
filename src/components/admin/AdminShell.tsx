@@ -13,6 +13,8 @@ import {
   UserCog,
   ShieldCheck,
   KeyRound,
+  Building2,
+  UserRound,
 } from "lucide-react";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { RoleGate } from "./RoleGate";
@@ -43,6 +45,13 @@ const groups = [
       { to: "/usuarios", label: "Usuários", icon: UserCog },
       { to: "/perfis", label: "Perfis", icon: ShieldCheck },
       { to: "/acessos", label: "Acessos", icon: KeyRound },
+    ],
+  },
+  {
+    label: "Configurações",
+    items: [
+      { to: "/empresa", label: "Dados da empresa", icon: Building2 },
+      { to: "/meu-perfil", label: "Meu perfil", icon: UserRound },
     ],
   },
 ] as const;

@@ -44,11 +44,17 @@ function LoginPage() {
           },
         });
         if (error) throw error;
+        // Sem dupla confirmação: entra direto após criar a conta.
         if (!data.session) {
-          setInfo(
-            "Cadastro criado. Verifique seu e-mail para confirmar o acesso e depois entre.",
-          );
-          setMode("signin");
+          const signIn = await supabase.auth.signInWithPassword({ email, password });
+          if (signIn.error) {
+            setInfo(
+              "Conta criada. Se o acesso não abrir automaticamente, entre com seu e-mail e senha.",
+            );
+            setMode("signin");
+            return;
+          }
+          await routeByRole(signIn.data.user.id);
           return;
         }
         await routeByRole(data.user!.id);
