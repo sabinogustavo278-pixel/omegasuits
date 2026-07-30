@@ -82,6 +82,7 @@ export function CrudManager(props: CrudManagerProps) {
     templateColumns,
     templateBase,
     numericColumns = [],
+    importKey,
     defaultSort,
     readOnly,
     stats,
