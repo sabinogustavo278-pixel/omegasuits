@@ -5,9 +5,18 @@ function triggerDownload(blob: Blob, filename: string) {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  a.rel = "noopener";
+  a.target = "_self";
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  // Fallback: alguns ambientes (preview em iframe) bloqueiam o download direto.
+  window.setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 4000);
 }
+
 
 /** Exporta um template (cabeçalhos + linhas opcionais) em CSV. */
 export function exportCsv(filename: string, columns: string[], rows: Array<Record<string, unknown>> = []) {

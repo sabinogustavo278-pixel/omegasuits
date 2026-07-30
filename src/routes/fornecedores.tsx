@@ -34,6 +34,7 @@ function FornecedoresPage() {
         ]}
         defaultSort={{ key: "razao_social", dir: "asc" }}
         templateBase="fornecedores-template"
+        importKey="cnpj"
         templateColumns={[
           "razao_social",
           "nome_fantasia",
@@ -71,9 +72,9 @@ function FornecedoresPage() {
           { key: "status", label: "Status", render: (r) => <StatusPill status={String(r.status)} /> },
         ]}
         fields={[
-          { name: "razao_social", label: "Razão social" },
+          { name: "razao_social", label: "Razão social", required: true },
           { name: "nome_fantasia", label: "Nome fantasia" },
-          { name: "cnpj", label: "CNPJ" },
+          { name: "cnpj", label: "CNPJ", required: true },
           { name: "inscricao_estadual", label: "Inscrição estadual" },
           { name: "email", label: "E-mail", type: "email" },
           { name: "telefone", label: "Telefone", type: "tel" },

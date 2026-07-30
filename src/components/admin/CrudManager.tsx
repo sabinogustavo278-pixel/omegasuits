@@ -3,7 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Upload, Plus, X, ImagePlus, Pencil, Trash2 } from "lucide-react";
 import { DataTable, Thumb } from "./DataTable";
 import { useTableSort, type SortState } from "@/hooks/use-table-sort";
-import { callRpc, deleteRows, friendlyError, insertRows, updateRow, type TableName } from "@/lib/db";
+import {
+  callRpc,
+  deleteRows,
+  friendlyError,
+  insertRows,
+  updateRow,
+  upsertByKey,
+  type TableName,
+} from "@/lib/db";
 import { exportCsv, exportXlsx, parseSheet } from "@/lib/sheet";
 import { uploadImages, type BucketName } from "@/lib/storage";
 
@@ -14,6 +22,8 @@ export interface CrudField {
   label: string;
   type?: "text" | "number" | "email" | "tel" | "date" | "textarea" | "select";
   options?: Array<{ value: string; label: string }>;
+  /** Campos essenciais — o restante é opcional. */
+  required?: boolean;
 }
 
 export interface CrudColumn {
@@ -41,6 +51,8 @@ export interface CrudManagerProps {
   templateColumns: string[];
   templateBase: string;
   numericColumns?: string[];
+  /** Chave natural usada na importação para decidir entre inserir e atualizar. */
+  importKey?: string;
   defaultSort?: SortState;
   readOnly?: boolean;
   stats?: (rows: Rec[]) => ReactNode;
@@ -70,6 +82,7 @@ export function CrudManager(props: CrudManagerProps) {
     templateColumns,
     templateBase,
     numericColumns = [],
+    importKey,
     defaultSort,
     readOnly,
     stats,
@@ -135,11 +148,11 @@ export function CrudManager(props: CrudManagerProps) {
         })
         .filter((o) => Object.keys(o).length > 0);
       if (payload.length === 0) throw new Error("Nenhuma linha válida encontrada no arquivo.");
-      await insertRows(table, payload);
-      return payload.length;
+      const key = importKey ?? templateColumns[0];
+      return upsertByKey(table, key, payload);
     },
-    onSuccess: (n) => {
-      setFeedback(`${n} registro(s) importado(s).`);
+    onSuccess: (res) => {
+      setFeedback(`Importação concluída: ${res.inserted} novo(s), ${res.updated} atualizado(s).`);
       invalidate();
     },
     onError: (e) => setFeedback(friendlyError(e)),
@@ -152,9 +165,17 @@ export function CrudManager(props: CrudManagerProps) {
     const data = rows.map((r) =>
       Object.fromEntries(templateColumns.map((c) => [c, r[c] ?? ""])),
     );
-    if (format === "csv") exportCsv(`${templateBase}.csv`, templateColumns, data);
-    else exportXlsx(`${templateBase}.xlsx`, templateColumns, data);
+    try {
+      if (format === "csv") exportCsv(`${templateBase}.csv`, templateColumns, data);
+      else exportXlsx(`${templateBase}.xlsx`, templateColumns, data);
+      setFeedback(
+        `Template ${format.toUpperCase()} gerado (${data.length} linha(s) de exemplo). Verifique os downloads do navegador.`,
+      );
+    } catch (e) {
+      setFeedback(friendlyError(e));
+    }
   };
+
 
   return (
     <>
@@ -534,12 +555,14 @@ function RecordForm({
                 className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground"
               >
                 {f.label}
+                {f.required ? <span className="ml-1 text-accent">*</span> : null}
               </label>
               {f.type === "textarea" ? (
                 <textarea
                   id={`f-${f.name}`}
                   rows={3}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -548,6 +571,7 @@ function RecordForm({
                 <select
                   id={`f-${f.name}`}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -565,6 +589,7 @@ function RecordForm({
                   type={f.type === "number" ? "number" : f.type === "date" ? "date" : f.type ?? "text"}
                   step={f.type === "number" ? "any" : undefined}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -573,6 +598,12 @@ function RecordForm({
             </div>
           ))}
         </div>
+
+        <p className="mt-4 text-xs text-muted-foreground">
+          Campos marcados com <span className="text-accent">*</span> são obrigatórios. Os demais podem
+          ser preenchidos depois.
+        </p>
+
 
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
 
