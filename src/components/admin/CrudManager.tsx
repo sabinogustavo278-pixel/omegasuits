@@ -147,11 +147,11 @@ export function CrudManager(props: CrudManagerProps) {
         })
         .filter((o) => Object.keys(o).length > 0);
       if (payload.length === 0) throw new Error("Nenhuma linha válida encontrada no arquivo.");
-      await insertRows(table, payload);
-      return payload.length;
+      const key = importKey ?? templateColumns[0];
+      return upsertByKey(table, key, payload);
     },
-    onSuccess: (n) => {
-      setFeedback(`${n} registro(s) importado(s).`);
+    onSuccess: (res) => {
+      setFeedback(`Importação concluída: ${res.inserted} novo(s), ${res.updated} atualizado(s).`);
       invalidate();
     },
     onError: (e) => setFeedback(friendlyError(e)),
@@ -164,9 +164,17 @@ export function CrudManager(props: CrudManagerProps) {
     const data = rows.map((r) =>
       Object.fromEntries(templateColumns.map((c) => [c, r[c] ?? ""])),
     );
-    if (format === "csv") exportCsv(`${templateBase}.csv`, templateColumns, data);
-    else exportXlsx(`${templateBase}.xlsx`, templateColumns, data);
+    try {
+      if (format === "csv") exportCsv(`${templateBase}.csv`, templateColumns, data);
+      else exportXlsx(`${templateBase}.xlsx`, templateColumns, data);
+      setFeedback(
+        `Template ${format.toUpperCase()} gerado (${data.length} linha(s) de exemplo). Verifique os downloads do navegador.`,
+      );
+    } catch (e) {
+      setFeedback(friendlyError(e));
+    }
   };
+
 
   return (
     <>
