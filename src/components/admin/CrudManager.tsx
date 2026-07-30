@@ -555,12 +555,14 @@ function RecordForm({
                 className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground"
               >
                 {f.label}
+                {f.required ? <span className="ml-1 text-accent">*</span> : null}
               </label>
               {f.type === "textarea" ? (
                 <textarea
                   id={`f-${f.name}`}
                   rows={3}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -569,6 +571,7 @@ function RecordForm({
                 <select
                   id={`f-${f.name}`}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -586,6 +589,7 @@ function RecordForm({
                   type={f.type === "number" ? "number" : f.type === "date" ? "date" : f.type ?? "text"}
                   step={f.type === "number" ? "any" : undefined}
                   disabled={readOnly}
+                  required={!readOnly && f.required}
                   className={inputCls}
                   value={String(values[f.name] ?? "")}
                   onChange={(e) => setValues((p) => ({ ...p, [f.name]: e.target.value }))}
@@ -594,6 +598,12 @@ function RecordForm({
             </div>
           ))}
         </div>
+
+        <p className="mt-4 text-xs text-muted-foreground">
+          Campos marcados com <span className="text-accent">*</span> são obrigatórios. Os demais podem
+          ser preenchidos depois.
+        </p>
+
 
         {error ? <p className="mt-4 text-sm text-red-700">{error}</p> : null}
 
