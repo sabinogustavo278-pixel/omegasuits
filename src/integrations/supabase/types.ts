@@ -899,6 +899,7 @@ export type Database = {
         Returns: {
           categoria: string
           categoria_id: string
+          categoria_slug: string
           cor: string
           created_at: string
           custo: number
