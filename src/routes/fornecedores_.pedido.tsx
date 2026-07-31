@@ -412,7 +412,8 @@ function PedidoForm({
               className={inputCls}
             />
           </div>
-          <div>
+
+
 
           <div className="md:col-span-2">
             <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
