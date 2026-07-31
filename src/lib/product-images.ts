@@ -49,8 +49,11 @@ export function fallbackImage(name: string, cor?: string | null): string {
     if (n.includes("preto")) return loaferPreto;
     return oxfordHavana;
   }
-  if (n.includes("camiseta")) return n.includes("listr") ? camisetaListras : camisetaAzul;
-  if (n.includes("camisa")) return camisaBranca;
+  if (n.includes("camisa") || n.includes("camiseta")) {
+    if (n.includes("listr")) return camisaSocialListrada;
+    if (n.includes("azul")) return camisaSocialAzul;
+    return camisaBranca;
+  }
   if (n.includes("colete")) {
     if (n.includes("cinza")) return ternoColeteCinza;
     if (n.includes("preto")) return ternoColetePreto;
