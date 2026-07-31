@@ -1,44 +1,43 @@
-# Objetivo
+## Objetivo
 
-Implementar as 8 mudanças de negócio (banco + frontend) em uma única passagem.
+Preparar a estrutura administrativa para o Stripe: novo grupo no menu lateral, tela de configuração das chaves e tela de histórico de pagamentos com filtros reais.
 
-## 1. Banco de dados (uma migration)
+## 1. Menu lateral
 
-- **`empresa_config`**: nova tabela de linha única (razão social, nome fantasia, CNPJ, inscrição estadual, e-mail, telefone, endereço, cidade, estado, CEP, logo_url) com grants, RLS (leitura para autenticados; escrita só Administrador/Gerente), trigger de `updated_at` e um INSERT inicial com os dados atuais exibidos na tela `/empresa`.
-- **RPC `get_empresa_config()`** para leitura via SQL, seguindo o padrão das outras telas.
-- **Status de pedidos de compra**: padronizar em `pendente`, `recebido`, `cancelado`. A migration converte os registros existentes (`rascunho`/`enviado`/`aprovado` → `pendente`) e altera o default da coluna para `pendente`. `dashboard_metrics()` passa a contar pedidos abertos como `status = 'pendente'`.
-- **RPC `proximo_numero_pedido_compra(_fornecedor_id uuid)`**: retorna o próximo número sequencial baseado no último pedido daquele fornecedor (prefixo `PC-` + sequência com zeros).
-- **RPC `list_pedido_compra_itens(_pedido_id uuid)`**: itens do pedido com SKU, nome do produto, quantidade, custo unitário e subtotal (para o histórico e o documento impresso).
-- **Trigger de estoque**: função `SECURITY DEFINER` em `AFTER UPDATE OF status ON pedidos_compra` que, na transição para `recebido` (e só nela), soma as quantidades dos itens em `estoque` (criando a linha do produto se não existir), grava `ultima_movimentacao` e registra em `estoque_movimentacoes` (tipo `entrada`, referência do pedido). Uma flag/coluna `estoque_aplicado` evita dupla contagem se o status oscilar.
-- **RPCs de gráficos**: `faturamento_por_mes()` (soma de `valor_total` de `pedidos_venda` agrupada por mês, últimos 12 meses) e `produtos_por_mes()` (contagem de `produtos` por mês de criação, últimos 12 meses).
+Novo grupo **Gestão de Pagamentos** em `AdminShell`, com dois itens:
+- Configurações Stripe → `/pagamentos/configuracoes`
+- Histórico de Pagamentos → `/pagamentos/historico`
 
-## 2. Tela de Pedido de Compra (`/fornecedores/pedido`)
+Ambas as rotas entram na matriz de acessos (`/acessos`): Administrador com acesso total sempre ativo; Gerente somente leitura no histórico e sem acesso às chaves; Usuário sem acesso. O menu continua exibindo apenas o que o perfil pode ver.
 
-- Preço unitário passa a usar **estritamente `produtos.custo`** (sem fallback para `preco`); produto sem custo entra com valor vazio para digitação manual.
-- Ao escolher o fornecedor, o número é preenchido automaticamente via `proximo_numero_pedido_compra` (permanece editável).
-- Remoção do campo **Condição de Pagamento** do formulário.
-- Select de **Status** com apenas Pendente / Recebido / Cancelado (filtro da listagem idem).
-- Botão **Imprimir/Gerar documento** do pedido: cabeçalho com os dados de `empresa_config`, dados do fornecedor, itens com custo e total, em layout de impressão (marinho/carvão/marfim, Cormorant + Inter).
+## 2. Página "Configurações Stripe"
 
-## 3. Nova tela `/pedidos-compra/historico`
+Formulário limpo, no padrão marinho/carvão/marfim com dourado, com três campos: Publishable Key, Secret Key e Webhook Secret, mais o botão **Salvar Chaves**.
 
-- Lista os pedidos (RPC `list_pedidos_compra`) com filtro por texto, fornecedor e status, ordenação por cabeçalho de coluna, expansão dos itens e ação de **alterar status** (Pendente/Recebido/Cancelado) com confirmação ao marcar Recebido, avisando que o estoque será atualizado.
-- Rota adicionada ao `ACCESS_MATRIX` (`admin: full`, `gerente: full`, `usuario: read`) e ao menu lateral, respeitando as permissões por perfil.
+Ponto importante de segurança: a **Secret Key** e o **Webhook Secret** não podem ficar guardados em tabela do banco — qualquer pessoa com acesso ao banco (ou uma falha de permissão) passaria a poder movimentar dinheiro na sua conta Stripe. Então:
 
-## 4. Tela `/empresa`
+- **Publishable Key** (é pública por natureza): salva numa tabela de configuração `stripe_config`, visível e editável na tela.
+- **Secret Key** e **Webhook Secret**: salvos no cofre de segredos do projeto (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`). Ao clicar em "Salvar Chaves", abre-se o formulário seguro para você colar os valores; eles ficam disponíveis apenas para o código de servidor, nunca voltam para a tela. A tela mostra apenas o indicador "configurada / não configurada" e um botão "Substituir".
 
-Passa a ler e gravar `empresa_config` de verdade (via RPC na leitura), substituindo os valores estáticos, com upload de logo tratada para o bucket existente.
+Também incluo o ambiente (Teste / Produção) e a data da última atualização na tabela de configuração.
 
-## 5. Correção dos downloads de template (Clientes e Fornecedores)
+## 3. Página "Histórico de Pagamentos"
 
-Centralizar em `src/lib/sheet.ts` um `triggerDownload` mais robusto: `URL.createObjectURL(blob)` + âncora com `download`, e fallback automático de `window.open(url, "_blank")` quando o clique é bloqueado pelo iframe do preview — aplicado tanto ao CSV quanto ao XLSX, usado por todas as telas de cadastro.
+Tabela moderna no padrão das outras telas (cabeçalho com classificação, thumbnail do cliente, filtro de texto) com as colunas: **Data, Cliente, Pedido, Valor R$, Status**.
 
-## 6. Dashboard analítico (`/dashboard`)
+Como ainda não há transações vindas do Stripe, crio a tabela `pagamentos` no banco, ligada a `pedidos_venda` e `clientes`, com status (aprovado, pendente, recusado, estornado), valor, data e as referências do Stripe (payment intent / charge) já previstas para a integração futura. A leitura da tela é feita por RPC (`list_pagamentos`), seguindo o padrão do sistema.
 
-Dois gráficos reais com Recharts (já instalado), alimentados pelas novas RPCs: **Faturamento de pedidos por mês (R$)** em barras/linha e **Quantidade de produtos por mês** em barras, com estados de carregamento/erro e cores do design system.
+## 4. Filtros funcionais
+
+No topo do histórico:
+- **Status**: Todos / Aprovado / Pendente / Recusado / Estornado
+- **Período**: Data Inicial e Data Final
+
+Os filtros são passados como parâmetros para a RPC e a tabela é atualizada automaticamente a cada mudança (sem botão "aplicar"). Cartões de resumo acima da tabela (total aprovado, pendente, estornado) respeitam os mesmos filtros.
 
 ## Detalhes técnicos
 
-- Toda leitura de tela continua via RPC (`callRpc`), com os novos nomes adicionados ao union type em `src/lib/db.ts`.
-- A soma no estoque fica no banco (trigger), não no frontend, garantindo consistência mesmo em alterações feitas fora da tela.
-- Após a migration, o `types.ts` é regenerado e as telas são ajustadas na sequência.
+- Migration: `stripe_config` (linha única, publishable key + ambiente) e `pagamentos` (FKs para `pedidos_venda` e `clientes`), com GRANTs e RLS restrita a Administrador/Gerente; RPCs `get_stripe_config` e `list_pagamentos(_status, _data_inicio, _data_fim)`.
+- Novas rotas: `src/routes/pagamentos.configuracoes.tsx` e `src/routes/pagamentos.historico.tsx`, cada uma com `head()` próprio.
+- `src/lib/db.ts`: novos nomes de RPC e tabela.
+- Nenhuma cobrança/checkout Stripe é implementada nesta etapa — apenas a estrutura administrativa.
