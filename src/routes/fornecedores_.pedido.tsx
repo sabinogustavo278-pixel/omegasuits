@@ -250,11 +250,11 @@ function PedidoForm({
   });
 
   const [fornecedorId, setFornecedorId] = useState("");
-  const [numero, setNumero] = useState(`PC-${Date.now().toString().slice(-6)}`);
+  const [numero, setNumero] = useState("");
   const [dataPedido, setDataPedido] = useState(new Date().toISOString().slice(0, 10));
   const [previsao, setPrevisao] = useState("");
-  const [statusValue, setStatusValue] = useState("rascunho");
-  const [condicao, setCondicao] = useState("");
+  const [statusValue, setStatusValue] = useState("pendente");
+
   const [observacoes, setObservacoes] = useState("");
   const [items, setItems] = useState<ItemDraft[]>([
     { produto_id: "", quantidade: "1", preco_unitario: "" },
