@@ -15,6 +15,8 @@ export const ACCESS_MATRIX: Record<string, Record<Role, Access>> = {
   "/dashboard":            { admin: "full", gerente: "full", usuario: "full" },
   "/fornecedores":         { admin: "full", gerente: "full", usuario: "none" },
   "/fornecedores/pedido":  { admin: "full", gerente: "full", usuario: "none" },
+  "/pedidos-compra/historico": { admin: "full", gerente: "full", usuario: "none" },
+
   "/categorias":           { admin: "full", gerente: "full", usuario: "none" },
   "/produtos":             { admin: "full", gerente: "full", usuario: "read" },
   "/estoque":              { admin: "full", gerente: "full", usuario: "read" },
