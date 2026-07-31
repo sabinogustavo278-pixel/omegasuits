@@ -28,6 +28,8 @@ const groups = [
     items: [
       { to: "/fornecedores", label: "Cadastro", icon: Truck },
       { to: "/fornecedores/pedido", label: "Pedido", icon: ClipboardList },
+      { to: "/pedidos-compra/historico", label: "Histórico de pedidos", icon: ClipboardList },
+
     ],
   },
   {
