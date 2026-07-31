@@ -262,6 +262,23 @@ function PedidoForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Ao selecionar o fornecedor, busca o próximo número disponível no banco.
+  useEffect(() => {
+    if (!fornecedorId) return;
+    let ativo = true;
+    callRpcValue<string>("proximo_numero_pedido_compra", { _fornecedor_id: fornecedorId })
+      .then((n) => {
+        if (ativo && n) setNumero(n);
+      })
+      .catch(() => {
+        if (ativo) setNumero((prev) => prev || `PC-${Date.now().toString().slice(-5)}`);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [fornecedorId]);
+
+
   const produtos = useMemo(() => prods ?? [], [prods]);
   const fornecedoresDoPedido = useMemo(
     () => (fornecedorId ? produtos.filter((p) => String(p.fornecedor_id) === fornecedorId) : produtos),
