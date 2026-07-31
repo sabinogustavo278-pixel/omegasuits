@@ -1,13 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Printer, Trash2, X } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
 import { useTableSort } from "@/hooks/use-table-sort";
-import { callRpc, deleteRows, friendlyError, insertOne, insertRows, type Row } from "@/lib/db";
+import {
+  callRpc,
+  callRpcValue,
+  deleteRows,
+  friendlyError,
+  insertOne,
+  insertRows,
+  type Row,
+} from "@/lib/db";
 import { formatPrice } from "@/data/products";
 import { isReadOnly, useActiveRole } from "@/lib/mock-roles";
+import {
+  buildPedidoCompraHtml,
+  PEDIDO_COMPRA_STATUS,
+  printPedidoCompra,
+} from "@/lib/pedido-compra";
+
 
 export const Route = createFileRoute("/fornecedores_/pedido")({
   head: () => ({
@@ -20,14 +34,8 @@ export const Route = createFileRoute("/fornecedores_/pedido")({
   component: PedidosPage,
 });
 
-const ABERTOS = ["rascunho", "enviado", "aprovado"];
-const STATUS = [
-  { value: "rascunho", label: "Rascunho" },
-  { value: "enviado", label: "Enviado" },
-  { value: "aprovado", label: "Aprovado" },
-  { value: "recebido", label: "Recebido" },
-  { value: "cancelado", label: "Cancelado" },
-];
+const ABERTOS = ["pendente"];
+const STATUS = PEDIDO_COMPRA_STATUS;
 
 const inputCls =
   "w-full border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-foreground";
@@ -50,6 +58,30 @@ function PedidosPage() {
     queryFn: () => callRpc("list_pedidos_compra"),
   });
   const rows = pedidos.data ?? [];
+
+  const empresa = useQuery({
+    queryKey: ["get_empresa_config"],
+    queryFn: () => callRpc("get_empresa_config"),
+  });
+  const fornecedores = useQuery({
+    queryKey: ["list_fornecedores"],
+    queryFn: () => callRpc("list_fornecedores"),
+  });
+
+  async function imprimir(pedido: Row) {
+    const itens = await callRpc("list_pedido_compra_itens", { _pedido_id: String(pedido.id) });
+    const fornecedor =
+      (fornecedores.data ?? []).find((f) => String(f.id) === String(pedido.fornecedor_id)) ?? null;
+    printPedidoCompra(
+      buildPedidoCompraHtml({
+        empresa: empresa.data?.[0] ?? null,
+        pedido,
+        fornecedor,
+        itens,
+      }),
+    );
+  }
+
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("todos");
@@ -194,21 +226,32 @@ function PedidosPage() {
                   <StatusPill status={String(r.status)} />
                 </td>
                 <td className="px-6 py-4 text-right">
-                  {!readOnly ? (
+                  <div className="flex items-center justify-end gap-3">
                     <button
                       type="button"
-                      aria-label="Excluir pedido"
-                      onClick={() => {
-                        if (window.confirm(`Excluir o pedido ${r.numero ?? ""}?`)) {
-                          removeMutation.mutate(String(r.id));
-                        }
-                      }}
-                      className="text-muted-foreground transition-colors hover:text-red-700"
+                      aria-label="Imprimir pedido"
+                      onClick={() => void imprimir(r)}
+                      className="text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                      <Printer className="h-4 w-4" strokeWidth={1.5} />
                     </button>
-                  ) : null}
+                    {!readOnly ? (
+                      <button
+                        type="button"
+                        aria-label="Excluir pedido"
+                        onClick={() => {
+                          if (window.confirm(`Excluir o pedido ${r.numero ?? ""}?`)) {
+                            removeMutation.mutate(String(r.id));
+                          }
+                        }}
+                        className="text-muted-foreground transition-colors hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                    ) : null}
+                  </div>
                 </td>
+
               </tr>
             ))
           )}
@@ -247,17 +290,34 @@ function PedidoForm({
   });
 
   const [fornecedorId, setFornecedorId] = useState("");
-  const [numero, setNumero] = useState(`PC-${Date.now().toString().slice(-6)}`);
+  const [numero, setNumero] = useState("");
   const [dataPedido, setDataPedido] = useState(new Date().toISOString().slice(0, 10));
   const [previsao, setPrevisao] = useState("");
-  const [statusValue, setStatusValue] = useState("rascunho");
-  const [condicao, setCondicao] = useState("");
+  const [statusValue, setStatusValue] = useState("pendente");
+
   const [observacoes, setObservacoes] = useState("");
   const [items, setItems] = useState<ItemDraft[]>([
     { produto_id: "", quantidade: "1", preco_unitario: "" },
   ]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Ao selecionar o fornecedor, busca o próximo número disponível no banco.
+  useEffect(() => {
+    if (!fornecedorId) return;
+    let ativo = true;
+    callRpcValue<string>("proximo_numero_pedido_compra", { _fornecedor_id: fornecedorId })
+      .then((n) => {
+        if (ativo && n) setNumero(n);
+      })
+      .catch(() => {
+        if (ativo) setNumero((prev) => prev || `PC-${Date.now().toString().slice(-5)}`);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [fornecedorId]);
+
 
   const produtos = useMemo(() => prods ?? [], [prods]);
   const fornecedoresDoPedido = useMemo(
@@ -274,16 +334,13 @@ function PedidoForm({
 
   const pickProduct = (idx: number, produtoId: string) => {
     const prod = produtos.find((p) => String(p.id) === produtoId);
+    // Pedido ao fornecedor usa estritamente o preço de custo do produto.
     setItem(idx, {
       produto_id: produtoId,
-      preco_unitario:
-        prod?.custo != null
-          ? String(prod.custo)
-          : prod?.preco != null
-            ? String(prod.preco)
-            : items[idx]?.preco_unitario ?? "",
+      preco_unitario: prod?.custo != null && prod.custo !== "" ? String(prod.custo) : "",
     });
   };
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -301,8 +358,8 @@ function PedidoForm({
         data_entrega_prevista: previsao || null,
         status: statusValue,
         valor_total: total,
-        condicao_pagamento: condicao || null,
         observacoes: observacoes || null,
+
       });
       const payload: Row[] = validos.map((i) => ({
         pedido_id: pedidoId,
@@ -409,17 +466,9 @@ function PedidoForm({
               className={inputCls}
             />
           </div>
-          <div>
-            <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
-              Condição de pagamento
-            </label>
-            <input
-              value={condicao}
-              onChange={(e) => setCondicao(e.target.value)}
-              placeholder="30/60/90"
-              className={inputCls}
-            />
-          </div>
+
+
+
           <div className="md:col-span-2">
             <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
               Observações

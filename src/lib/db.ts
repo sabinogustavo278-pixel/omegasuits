@@ -11,7 +11,12 @@ type RpcName =
   | "list_pedidos_venda"
   | "list_pedidos_cliente"
   | "dashboard_metrics"
-  | "list_produto_imagens";
+  | "list_produto_imagens"
+  | "get_empresa_config"
+  | "proximo_numero_pedido_compra"
+  | "list_pedido_compra_itens"
+  | "faturamento_por_mes"
+  | "produtos_por_mes";
 
 export type Row = Record<string, unknown>;
 
@@ -22,6 +27,16 @@ export async function callRpc<T = Row>(name: RpcName, args?: Row): Promise<T[]> 
   const { data, error } = await client.rpc(name, args);
   if (error) throw new Error(error.message);
   return (data ?? []) as T[];
+}
+
+/** RPC que devolve um valor escalar (texto, número). */
+export async function callRpcValue<T = string>(name: RpcName, args?: Row): Promise<T | null> {
+  const client = supabase as unknown as {
+    rpc: (n: string, a?: Row) => Promise<{ data: unknown; error: { message: string } | null }>;
+  };
+  const { data, error } = await client.rpc(name, args);
+  if (error) throw new Error(error.message);
+  return (data ?? null) as T | null;
 }
 
 export type TableName =
@@ -35,7 +50,8 @@ export type TableName =
   | "pedidos_compra_itens"
   | "pedidos_venda"
   | "pedidos_venda_itens"
-  | "produtos_imagens";
+  | "produtos_imagens"
+  | "empresa_config";
 
 type QueryLike = {
   insert: (v: Row | Row[]) => Promise<{ error: { message: string } | null }>;

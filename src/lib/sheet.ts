@@ -2,20 +2,37 @@ import * as XLSX from "xlsx";
 
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.rel = "noopener";
-  a.target = "_self";
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  // Fallback: alguns ambientes (preview em iframe) bloqueiam o download direto.
-  window.setTimeout(() => {
+  let clicked = false;
+  try {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    clicked = true;
     a.remove();
-    URL.revokeObjectURL(url);
-  }, 4000);
+  } catch {
+    clicked = false;
+  }
+
+  // O preview roda dentro de um iframe que pode bloquear o download direto:
+  // nesse caso abrimos o blob em uma nova aba (ou na aba do topo) como fallback.
+  if (!clicked) {
+    const win = window.open(url, "_blank", "noopener");
+    if (!win) {
+      try {
+        (window.top ?? window).location.href = url;
+      } catch {
+        window.location.href = url;
+      }
+    }
+  }
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
+
 
 
 /** Exporta um template (cabeçalhos + linhas opcionais) em CSV. */

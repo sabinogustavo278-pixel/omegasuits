@@ -28,6 +28,7 @@ import { Route as CalcadosRouteImport } from './routes/calcados'
 import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-compra.historico'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
 
 const UsuariosRoute = UsuariosRouteImport.update({
@@ -125,6 +126,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidosCompraHistoricoRoute = PedidosCompraHistoricoRouteImport.update({
+  id: '/pedidos-compra/historico',
+  path: '/pedidos-compra/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   id: '/fornecedores_/pedido',
   path: '/fornecedores/pedido',
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
+  '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
+  '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores_/pedido': typeof FornecedoresPedidoRoute
+  '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores/pedido'
+    | '/pedidos-compra/historico'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores/pedido'
+    | '/pedidos-compra/historico'
   id:
     | '__root__'
     | '/'
@@ -265,6 +276,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores_/pedido'
+    | '/pedidos-compra/historico'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -288,6 +300,7 @@ export interface RootRouteChildren {
   TernosRoute: typeof TernosRoute
   UsuariosRoute: typeof UsuariosRoute
   FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
+  PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -425,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedidos-compra/historico': {
+      id: '/pedidos-compra/historico'
+      path: '/pedidos-compra/historico'
+      fullPath: '/pedidos-compra/historico'
+      preLoaderRoute: typeof PedidosCompraHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fornecedores_/pedido': {
       id: '/fornecedores_/pedido'
       path: '/fornecedores/pedido'
@@ -456,17 +476,8 @@ const rootRouteChildren: RootRouteChildren = {
   TernosRoute: TernosRoute,
   UsuariosRoute: UsuariosRoute,
   FornecedoresPedidoRoute: FornecedoresPedidoRoute,
+  PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
