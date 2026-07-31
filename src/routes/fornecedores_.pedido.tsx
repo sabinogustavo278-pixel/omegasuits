@@ -413,16 +413,7 @@ function PedidoForm({
             />
           </div>
           <div>
-            <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
-              Condição de pagamento
-            </label>
-            <input
-              value={condicao}
-              onChange={(e) => setCondicao(e.target.value)}
-              placeholder="30/60/90"
-              className={inputCls}
-            />
-          </div>
+
           <div className="md:col-span-2">
             <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
               Observações
