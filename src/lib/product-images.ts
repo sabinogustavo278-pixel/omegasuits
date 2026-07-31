@@ -5,8 +5,8 @@ import ternoColeteCinza from "@/assets/p-terno-colete-cinza.jpg";
 import ternoColetePreto from "@/assets/p-terno-colete-preto.jpg";
 import ternoColeteMarinho from "@/assets/p-terno-colete-marinho.jpg";
 import camisaBranca from "@/assets/p-camisa-branca.jpg";
-import camisetaAzul from "@/assets/p-camiseta-azul.jpg";
-import camisetaListras from "@/assets/p-camiseta-listras.jpg";
+import camisaSocialAzul from "@/assets/p-camisa-social-azul.jpg";
+import camisaSocialListrada from "@/assets/p-camisa-social-listrada.jpg";
 import oxfordHavana from "@/assets/p-oxford-havana.jpg";
 import oxfordCafe from "@/assets/p-oxford-cafe.jpg";
 import loaferPreto from "@/assets/p-loafer-preto.jpg";
@@ -49,8 +49,11 @@ export function fallbackImage(name: string, cor?: string | null): string {
     if (n.includes("preto")) return loaferPreto;
     return oxfordHavana;
   }
-  if (n.includes("camiseta")) return n.includes("listr") ? camisetaListras : camisetaAzul;
-  if (n.includes("camisa")) return camisaBranca;
+  if (n.includes("camisa") || n.includes("camiseta")) {
+    if (n.includes("listr")) return camisaSocialListrada;
+    if (n.includes("azul")) return camisaSocialAzul;
+    return camisaBranca;
+  }
   if (n.includes("colete")) {
     if (n.includes("cinza")) return ternoColeteCinza;
     if (n.includes("preto")) return ternoColetePreto;
