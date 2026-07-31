@@ -1,56 +1,34 @@
-## 1. Rota /fornecedores/pedido (causa confirmada)
+## Diagnóstico (verificado no banco)
 
-No roteamento atual, `fornecedores.pedido.tsx` fica **aninhada** dentro de `fornecedores.tsx`, e a página de Fornecedores não renderiza `<Outlet />` — por isso a URL de pedido mostra o cadastro de fornecedores.
+- Os 20 produtos existem com preços atualizados, mas **apenas 1 tem categoria vinculada** (Abotoaduras → Acessórios); os outros 19 estão com `categoria_id` nulo.
+- **Nenhum produto tem `imagem_url`**; o código descarta produtos sem imagem e, com a lista vazia, cai no catálogo mock de `src/data/products.ts` — daí a vitrine desatualizada.
+- O código procura `categoria_slug`, campo que a função `list_produtos` não retorna → filtro de categoria nunca funciona.
+- Categorias: Ternos, Camisas, Calçados, Acessórios (sem `slug`). As 4 "Gravata de Seda Detalhada" já têm `cor` distinta (Amarela, Marrom, Verde, Vermelho) e um produto está com status `Ativo` em vez de `publicado`.
+- `tamanho` está preenchido como faixa: ternos `44 ao 56`, sapatos `36 ao 47`, camisas/camisetas `P ao XGG`, gravatas `único`; cintos e abotoaduras sem tamanho.
 
-Correção: transformar em rota irmã (`fornecedores_.pedido.tsx`) e reescrever a tela como um **Pedido de Compra** de verdade:
-- seleção de fornecedor via RPC `list_fornecedores`;
-- itens do pedido: escolher produto (via `list_produtos`), quantidade e preço unitário, com adicionar/remover linhas;
-- subtotal por item e valor total calculados na tela;
-- ao salvar: grava em `pedidos_compra` e os itens em `pedidos_compra_itens` (com `pedido_id`), atualizando `valor_total`;
-- lista dos pedidos existentes via `list_pedidos_compra`, com filtro, ordenação, edição e exclusão.
+## O que será feito
 
-## 2. Formulários em branco (Produtos, Clientes, Fornecedores, Categorias)
+### 1. Corrigir os dados no banco
+- Preencher `slug` das categorias: `ternos`, `camisaria` (categoria "Camisas"), `calcados`, `acessorios`.
+- Vincular cada produto à categoria pelo nome: Terno/Transpassado → Ternos; Camisa/Camiseta → Camisas; Sapato → Calçados; Gravata/Cinto/Abotoaduras → Acessórios.
+- Renomear as gravatas duplicadas usando a cor: "Gravata de Seda Amarela", "Marrom", "Verde", "Vermelha".
+- Normalizar status `Ativo` → `publicado`.
+- Atualizar `list_produtos` para devolver `categoria_slug`, `tamanho` e `cor` (leitura da vitrine segue via RPC).
 
-O código do modal renderiza os campos, então a causa exata ainda **não está confirmada**. Primeiro passo: reproduzir clicando em "Novo" nas 4 telas e ler console/erros. Hipóteses a verificar, na ordem:
-- perfil ativo caindo em modo somente-leitura/gate, esvaziando o corpo do modal;
-- lista de campos dependente de RPCs (`list_categorias`/`list_fornecedores`) que falham sem sessão, deixando o formulário sem conteúdo útil;
-- erro de render dentro do modal derrubando a árvore.
+### 2. Vitrine ligada ao banco real
+- `src/lib/catalog.ts`: classificar pelo `categoria_slug`, remover o fallback de mocks, não descartar produtos sem foto.
+- Home e `/ternos`, `/camisaria`, `/calcados`, `/acessorios` listam somente produtos publicados do banco, com preço atual (promocional quando houver).
+- Filtro real por categoria no topo, com contagem de itens e estados de carregando / “nenhum item nesta categoria”.
 
-Depois de identificado, corrigir na origem e garantir que o modal sempre renderize os inputs, com estado de carregamento nos selects em vez de vazio.
+### 3. Seletor de tamanhos
+- A faixa do banco é expandida em opções clicáveis: `44 ao 56` → 44, 46, 48, 50, 52, 54, 56; `36 ao 47` → 36…47; `P ao XGG` → P, M, G, GG, XGG; `único` → "Tamanho único" (pré-selecionado); sem tamanho → nenhum seletor.
+- Botões de tamanho no card/página do produto; "Adicionar à sacola" fica desabilitado até escolher o tamanho.
+- O carrinho passa a guardar `produto + tamanho` como itens distintos, e o tamanho escolhido aparece no resumo da sacola e no checkout.
 
-## 3. Template e Importação
-
-- Corrigir o download: anexar o link ao DOM antes do clique e liberar a URL depois, com fallback de abertura em nova aba (o preview em iframe pode bloquear downloads diretos).
-- Completar as colunas dos templates para refletirem **todas** as colunas gravável de cada tabela (incluindo vínculos como `categoria_id`, `fornecedor_id`, e campos de endereço em clientes/fornecedores).
-- Importação: ler CSV/XLSX, e em vez de apenas inserir, fazer **upsert** — se o registro já existe (chave natural: `sku` em produtos, `cnpj` em fornecedores, `cpf`/`email` em clientes, `slug`/`nome` em categorias), atualizar; se não, inserir. Mostrar resumo "X inseridos, Y atualizados" e erros por linha.
-
-## 4. Validações mínimas nos cadastros
-
-Marcar como obrigatórios apenas os essenciais e deixar o resto opcional:
-- Produtos: Nome, Preço, Fornecedor;
-- Clientes: Nome;
-- Fornecedores: Razão social, CNPJ;
-- Categorias: Nome.
-Campos obrigatórios recebem indicação visual e bloqueio de envio com mensagem clara.
-
-## 5. Cadastro sem confirmação de e-mail
-
-Habilitar auto-confirmação de e-mail na configuração do Auth do projeto e ajustar a tela de login para entrar direto após criar a conta (remover a mensagem "verifique seu e-mail" e o redirecionamento por link).
-
-## 6. Meu Perfil
-
-Nova rota `/meu-perfil`, com item no menu para usuários logados (header da loja e menu lateral do painel):
-- dados do usuário atual (nome, e-mail e avatar vindos do Auth/`user_profiles`);
-- seção de histórico de compras consultando `pedidos_venda` do cliente, via nova função SQL (RPC) que lista os pedidos com número, data, status, valor e quantidade de itens.
-
-A rota é registrada no gerenciamento de acessos com o perfil Administrador sempre ativo, e o menu lateral continua exibindo apenas rotas liberadas.
-
-## 7. Dados da Empresa
-
-Nova rota `/empresa` no painel (apenas visual, sem banco): formulário com Nome, CNPJ, Telefone e Endereço, no padrão da identidade (marinho/carvão/marfim, dourado, Cormorant + Inter), também registrada no gerenciamento de acessos e na sidebar.
+### 4. Imagens definitivas geradas por IA
+Fotos de estúdio verticais, fundo neutro, paleta marinho/carvão/marfim — uma por peça: terno marinho, transpassado preto, colete cinza claro, camisa social branca, camiseta azul claro, camiseta branca listrada, Oxford havana, Oxford marrom café, loafer preto, gravatas (marinho, amarela, marrom, verde, vermelha), cinto marrom, cinto preto e abotoaduras em prata. Cada produto recebe sua imagem pelo nome/cor; ao subir fotos reais no bucket, elas assumem o lugar sem mudar código.
 
 ## Detalhes técnicos
-
-- Nova migration apenas para a função SQL de histórico de compras do cliente (leitura via RPC, conforme a diretriz do projeto), com permissão para usuários autenticados.
-- Ajustes concentrados em `src/components/admin/CrudManager.tsx`, `src/lib/sheet.ts`, `src/lib/db.ts` (upsert), `src/lib/mock-roles.ts` (novas rotas na matriz), `src/components/admin/AdminShell.tsx`, `src/components/SiteHeader.tsx`.
-- Correção silenciosa do aviso de hidratação do contador da sacola no header.
+- Migration: `CREATE OR REPLACE FUNCTION public.list_produtos()`; updates de dados em `categorias.slug`, `produtos.categoria_id`, `produtos.nome` e `produtos.status`.
+- Frontend: `src/lib/catalog.ts` (mapeamento, expansão de tamanhos, fallback de imagem), `src/components/ProductCard.tsx` (seletor), `src/lib/mock-cart.ts` (chave produto+tamanho), `src/routes/checkout.tsx`, `src/components/CategoryPage.tsx`, `src/routes/index.tsx`. `src/data/products.ts` fica só com tipos e `formatPrice`.
+- Imagens em `src/assets/`, importadas como ES6.
