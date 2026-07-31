@@ -277,16 +277,13 @@ function PedidoForm({
 
   const pickProduct = (idx: number, produtoId: string) => {
     const prod = produtos.find((p) => String(p.id) === produtoId);
+    // Pedido ao fornecedor usa estritamente o preço de custo do produto.
     setItem(idx, {
       produto_id: produtoId,
-      preco_unitario:
-        prod?.custo != null
-          ? String(prod.custo)
-          : prod?.preco != null
-            ? String(prod.preco)
-            : items[idx]?.preco_unitario ?? "",
+      preco_unitario: prod?.custo != null && prod.custo !== "" ? String(prod.custo) : "",
     });
   };
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
