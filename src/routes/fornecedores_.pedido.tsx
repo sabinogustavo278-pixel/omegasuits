@@ -301,7 +301,7 @@ function PedidoForm({
         data_entrega_prevista: previsao || null,
         status: statusValue,
         valor_total: total,
-        condicao_pagamento: condicao || null,
+        observacoes: observacoes || null,
         observacoes: observacoes || null,
       });
       const payload: Row[] = validos.map((i) => ({
