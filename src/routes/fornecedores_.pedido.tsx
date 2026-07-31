@@ -302,7 +302,7 @@ function PedidoForm({
         status: statusValue,
         valor_total: total,
         observacoes: observacoes || null,
-        observacoes: observacoes || null,
+
       });
       const payload: Row[] = validos.map((i) => ({
         pedido_id: pedidoId,
