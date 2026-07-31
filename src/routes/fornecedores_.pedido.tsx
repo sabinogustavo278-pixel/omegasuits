@@ -226,21 +226,32 @@ function PedidosPage() {
                   <StatusPill status={String(r.status)} />
                 </td>
                 <td className="px-6 py-4 text-right">
-                  {!readOnly ? (
+                  <div className="flex items-center justify-end gap-3">
                     <button
                       type="button"
-                      aria-label="Excluir pedido"
-                      onClick={() => {
-                        if (window.confirm(`Excluir o pedido ${r.numero ?? ""}?`)) {
-                          removeMutation.mutate(String(r.id));
-                        }
-                      }}
-                      className="text-muted-foreground transition-colors hover:text-red-700"
+                      aria-label="Imprimir pedido"
+                      onClick={() => void imprimir(r)}
+                      className="text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                      <Printer className="h-4 w-4" strokeWidth={1.5} />
                     </button>
-                  ) : null}
+                    {!readOnly ? (
+                      <button
+                        type="button"
+                        aria-label="Excluir pedido"
+                        onClick={() => {
+                          if (window.confirm(`Excluir o pedido ${r.numero ?? ""}?`)) {
+                            removeMutation.mutate(String(r.id));
+                          }
+                        }}
+                        className="text-muted-foreground transition-colors hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                    ) : null}
+                  </div>
                 </td>
+
               </tr>
             ))
           )}
