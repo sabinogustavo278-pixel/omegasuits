@@ -131,29 +131,29 @@ function CheckoutPage() {
                   </header>
                   <ul className="divide-y divide-border">
                     {entries.map((e) => (
-                      <li key={e.productId} className="flex gap-5 p-6">
+                      <li key={e.key} className="flex gap-5 p-6">
                         <img
-                          src={e.product.image}
-                          alt={e.product.name}
+                          src={e.image}
+                          alt={e.name}
                           className="h-32 w-24 flex-none object-cover"
                           loading="lazy"
                         />
                         <div className="flex flex-1 flex-col">
                           <p className="text-[10px] uppercase tracking-[0.28em] text-accent">
-                            {e.product.categoryLabel}
+                            {e.categoryLabel}
                           </p>
                           <h3 className="mt-1 font-serif text-lg text-foreground">
-                            {e.product.name}
+                            {e.name}
                           </h3>
-                          {e.product.tagline ? (
-                            <p className="text-xs text-muted-foreground">{e.product.tagline}</p>
-                          ) : null}
+                          <p className="mt-1 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                            Tamanho: <span className="text-foreground">{e.size}</span>
+                          </p>
                           <div className="mt-auto flex items-center justify-between pt-4">
                             <div className="inline-flex items-center border border-border">
                               <button
                                 type="button"
                                 aria-label="Diminuir"
-                                onClick={() => updateQty(e.productId, e.qty - 1)}
+                                onClick={() => updateQty(e.productId, e.size, e.qty - 1)}
                                 className="px-3 py-2 text-muted-foreground hover:text-foreground"
                               >
                                 <Minus className="h-3 w-3" strokeWidth={1.5} />
@@ -164,7 +164,7 @@ function CheckoutPage() {
                               <button
                                 type="button"
                                 aria-label="Aumentar"
-                                onClick={() => updateQty(e.productId, e.qty + 1)}
+                                onClick={() => updateQty(e.productId, e.size, e.qty + 1)}
                                 className="px-3 py-2 text-muted-foreground hover:text-foreground"
                               >
                                 <Plus className="h-3 w-3" strokeWidth={1.5} />
@@ -175,7 +175,7 @@ function CheckoutPage() {
                               <button
                                 type="button"
                                 aria-label="Remover"
-                                onClick={() => removeFromCart(e.productId)}
+                                onClick={() => removeFromCart(e.productId, e.size)}
                                 className="text-muted-foreground transition-colors hover:text-foreground"
                               >
                                 <Trash2 className="h-4 w-4" strokeWidth={1.25} />
@@ -185,6 +185,7 @@ function CheckoutPage() {
                         </div>
                       </li>
                     ))}
+
                   </ul>
                 </section>
 

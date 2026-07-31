@@ -1,16 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { HeroSection } from "@/components/HeroSection";
 import { ProductCard } from "@/components/ProductCard";
+import { categoryNames, type ProductCategory } from "@/data/products";
 import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Omega Suits — Alfaiataria masculina clássica" },
+      {
+        name: "description",
+        content:
+          "Ternos sob medida, camisaria fina, calçados Goodyear e acessórios em seda pura. Conheça a coleção Omega Suits.",
+      },
+      { property: "og:title", content: "Omega Suits — Alfaiataria masculina clássica" },
+      {
+        property: "og:description",
+        content: "Ternos, camisaria, calçados e acessórios da nova coleção de alfaiataria.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Home,
 });
 
+const FILTERS: ProductCategory[] = ["ternos", "camisaria", "calcados", "acessorios"];
+
 function Home() {
-  const { items } = useCatalog();
+  const [filter, setFilter] = useState<ProductCategory | "todos">("todos");
+  const { all, counts, loading } = useCatalog();
+  const items = filter === "todos" ? all : all.filter((p) => p.category === filter);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -37,11 +60,38 @@ function Home() {
               Visitar a loja
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((p) => (
-              <ProductCard key={p.id} product={p} />
+
+          <div className="mb-12 flex flex-wrap gap-3 border-b border-border/60 pb-6">
+            <FilterButton
+              active={filter === "todos"}
+              onClick={() => setFilter("todos")}
+              label="Todos"
+              count={all.length}
+            />
+            {FILTERS.map((c) => (
+              <FilterButton
+                key={c}
+                active={filter === c}
+                onClick={() => setFilter(c)}
+                label={categoryNames[c]}
+                count={counts[c] ?? 0}
+              />
             ))}
           </div>
+
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Carregando coleção…</p>
+          ) : items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma peça publicada nesta categoria no momento.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="border-y border-border/60 bg-secondary/50">
@@ -66,6 +116,34 @@ function Home() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+function FilterButton({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex items-center gap-2 border px-5 py-3 text-[10px] uppercase tracking-[0.3em] transition-colors ${
+        active
+          ? "border-accent bg-accent text-charcoal"
+          : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+      }`}
+    >
+      {label}
+      <span className="text-[9px] opacity-70">{count}</span>
+    </button>
   );
 }
 

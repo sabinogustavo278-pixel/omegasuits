@@ -3,12 +3,18 @@ import { addToCart } from "@/lib/mock-cart";
 import { useState } from "react";
 
 export function ProductCard({ product }: { product: Product }) {
+  const single = product.sizes.length === 1;
+  const [size, setSize] = useState<string | null>(single ? product.sizes[0] : null);
   const [added, setAdded] = useState(false);
+  const needsSize = product.sizes.length > 0;
+
   const onAdd = () => {
-    addToCart(product.id, 1);
+    if (needsSize && !size) return;
+    addToCart(product, size ?? "Único", 1);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1400);
   };
+
   return (
     <article className="group flex flex-col">
       <div className="relative overflow-hidden bg-secondary">
@@ -35,12 +41,43 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="mt-2 text-sm tracking-wide text-foreground">
           {formatPrice(product.price)}
         </p>
+
+        {needsSize ? (
+          <div className="mt-4">
+            <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              {single ? "Tamanho" : "Selecione o tamanho"}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {product.sizes.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={size === s}
+                  onClick={() => setSize(s)}
+                  className={`min-w-11 border px-3 py-2 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                    size === s
+                      ? "border-accent bg-accent text-charcoal"
+                      : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <button
           type="button"
           onClick={onAdd}
-          className="mt-4 inline-flex items-center justify-center border border-foreground/70 px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-foreground transition-colors hover:border-accent hover:text-accent"
+          disabled={needsSize && !size}
+          className="mt-4 inline-flex items-center justify-center border border-foreground/70 px-5 py-3 text-[10px] uppercase tracking-[0.3em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-foreground/70 disabled:hover:text-foreground"
         >
-          {added ? "Adicionado ✓" : "Adicionar à sacola"}
+          {added
+            ? "Adicionado ✓"
+            : needsSize && !size
+              ? "Escolha o tamanho"
+              : "Adicionar à sacola"}
         </button>
       </div>
     </article>

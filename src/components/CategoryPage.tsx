@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function CategoryPage({ category, title, description }: Props) {
-  const { items } = useCatalog(category);
+  const { items, loading } = useCatalog(category);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -23,9 +23,16 @@ export function CategoryPage({ category, title, description }: Props) {
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
             {description}
           </p>
+          {!loading ? (
+            <p className="mt-6 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+              {items.length} {items.length === 1 ? "peça" : "peças"}
+            </p>
+          ) : null}
         </section>
         <section className="mx-auto max-w-7xl px-6 pb-24 md:px-10 md:pb-32">
-          {items.length === 0 ? (
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Carregando coleção…</p>
+          ) : items.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Novas peças em breve. Aguarde a próxima estação.
             </p>
