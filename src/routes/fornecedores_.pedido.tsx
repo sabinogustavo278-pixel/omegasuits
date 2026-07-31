@@ -16,7 +16,12 @@ import {
 } from "@/lib/db";
 import { formatPrice } from "@/data/products";
 import { isReadOnly, useActiveRole } from "@/lib/mock-roles";
-import { PEDIDO_COMPRA_STATUS, printPedidoCompra } from "@/lib/pedido-compra";
+import {
+  buildPedidoCompraHtml,
+  PEDIDO_COMPRA_STATUS,
+  printPedidoCompra,
+} from "@/lib/pedido-compra";
+
 
 export const Route = createFileRoute("/fornecedores_/pedido")({
   head: () => ({
