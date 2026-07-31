@@ -124,6 +124,57 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_config: {
+        Row: {
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          inscricao_estadual: string | null
+          logo_url: string | null
+          nome_fantasia: string | null
+          razao_social: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          inscricao_estadual?: string | null
+          logo_url?: string | null
+          nome_fantasia?: string | null
+          razao_social?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string | null
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          inscricao_estadual?: string | null
+          logo_url?: string | null
+          nome_fantasia?: string | null
+          razao_social?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       estoque: {
         Row: {
           created_at: string
@@ -286,6 +337,7 @@ export type Database = {
           data_entrega_prevista: string | null
           data_entrega_real: string | null
           data_pedido: string | null
+          estoque_aplicado: boolean
           fornecedor_id: string | null
           id: string
           numero: string | null
@@ -300,6 +352,7 @@ export type Database = {
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
           data_pedido?: string | null
+          estoque_aplicado?: boolean
           fornecedor_id?: string | null
           id?: string
           numero?: string | null
@@ -314,6 +367,7 @@ export type Database = {
           data_entrega_prevista?: string | null
           data_entrega_real?: string | null
           data_pedido?: string | null
+          estoque_aplicado?: boolean
           fornecedor_id?: string | null
           id?: string
           numero?: string | null
@@ -733,6 +787,40 @@ export type Database = {
           valor_compras_abertas: number
         }[]
       }
+      faturamento_por_mes: {
+        Args: never
+        Returns: {
+          mes: string
+          pedidos: number
+          rotulo: string
+          total: number
+        }[]
+      }
+      get_empresa_config: {
+        Args: never
+        Returns: {
+          cep: string | null
+          cidade: string | null
+          cnpj: string | null
+          created_at: string
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          inscricao_estadual: string | null
+          logo_url: string | null
+          nome_fantasia: string | null
+          razao_social: string
+          telefone: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "empresa_config"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_profile: {
         Args: { _profile_name: string; _user_id: string }
         Returns: boolean
@@ -827,6 +915,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      list_pedido_compra_itens: {
+        Args: { _pedido_id: string }
+        Returns: {
+          id: string
+          imagem_url: string
+          preco_unitario: number
+          produto: string
+          produto_id: string
+          quantidade: number
+          sku: string
+          subtotal: number
+        }[]
+      }
       list_pedidos_cliente: {
         Args: never
         Returns: {
@@ -919,6 +1020,18 @@ export type Database = {
           status: string
           tamanho: string
         }[]
+      }
+      produtos_por_mes: {
+        Args: never
+        Returns: {
+          mes: string
+          rotulo: string
+          total: number
+        }[]
+      }
+      proximo_numero_pedido_compra: {
+        Args: { _fornecedor_id: string }
+        Returns: string
       }
     }
     Enums: {
