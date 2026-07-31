@@ -1,13 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Printer, Trash2, X } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { DataTable, StatCard, StatusPill } from "@/components/admin/DataTable";
 import { useTableSort } from "@/hooks/use-table-sort";
-import { callRpc, deleteRows, friendlyError, insertOne, insertRows, type Row } from "@/lib/db";
+import {
+  callRpc,
+  callRpcValue,
+  deleteRows,
+  friendlyError,
+  insertOne,
+  insertRows,
+  type Row,
+} from "@/lib/db";
 import { formatPrice } from "@/data/products";
 import { isReadOnly, useActiveRole } from "@/lib/mock-roles";
+import { PEDIDO_COMPRA_STATUS, printPedidoCompra } from "@/lib/pedido-compra";
 
 export const Route = createFileRoute("/fornecedores_/pedido")({
   head: () => ({
@@ -20,14 +29,8 @@ export const Route = createFileRoute("/fornecedores_/pedido")({
   component: PedidosPage,
 });
 
-const ABERTOS = ["rascunho", "enviado", "aprovado"];
-const STATUS = [
-  { value: "rascunho", label: "Rascunho" },
-  { value: "enviado", label: "Enviado" },
-  { value: "aprovado", label: "Aprovado" },
-  { value: "recebido", label: "Recebido" },
-  { value: "cancelado", label: "Cancelado" },
-];
+const ABERTOS = ["pendente"];
+const STATUS = PEDIDO_COMPRA_STATUS;
 
 const inputCls =
   "w-full border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-foreground";
