@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, Printer, X } from "lucide-react";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -193,8 +193,8 @@ function HistoricoPage() {
               const id = String(r.id);
               const expandido = aberto === id;
               return (
-                <>
-                  <tr key={id} className="border-t border-border/70">
+                <Fragment key={id}>
+                  <tr className="border-t border-border/70">
                     <td className="px-4 py-4">
                       <button
                         type="button"
@@ -269,13 +269,13 @@ function HistoricoPage() {
                     </td>
                   </tr>
                   {expandido ? (
-                    <tr key={`${id}-itens`} className="border-t border-border/40 bg-secondary/30">
+                    <tr className="border-t border-border/40 bg-secondary/30">
                       <td colSpan={8} className="px-6 py-4">
                         <ItensPedido pedidoId={id} />
                       </td>
                     </tr>
                   ) : null}
-                </>
+                </Fragment>
               );
             })
           )}
