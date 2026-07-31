@@ -54,6 +54,30 @@ function PedidosPage() {
   });
   const rows = pedidos.data ?? [];
 
+  const empresa = useQuery({
+    queryKey: ["get_empresa_config"],
+    queryFn: () => callRpc("get_empresa_config"),
+  });
+  const fornecedores = useQuery({
+    queryKey: ["list_fornecedores"],
+    queryFn: () => callRpc("list_fornecedores"),
+  });
+
+  async function imprimir(pedido: Row) {
+    const itens = await callRpc("list_pedido_compra_itens", { _pedido_id: String(pedido.id) });
+    const fornecedor =
+      (fornecedores.data ?? []).find((f) => String(f.id) === String(pedido.fornecedor_id)) ?? null;
+    printPedidoCompra(
+      buildPedidoCompraHtml({
+        empresa: empresa.data?.[0] ?? null,
+        pedido,
+        fornecedor,
+        itens,
+      }),
+    );
+  }
+
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("todos");
   const [open, setOpen] = useState(false);
