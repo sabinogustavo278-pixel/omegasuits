@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.aplicar_estoque_pedido_compra() FROM PUBLIC, anon, authenticated;
