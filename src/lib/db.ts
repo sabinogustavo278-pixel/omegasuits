@@ -11,7 +11,12 @@ type RpcName =
   | "list_pedidos_venda"
   | "list_pedidos_cliente"
   | "dashboard_metrics"
-  | "list_produto_imagens";
+  | "list_produto_imagens"
+  | "get_empresa_config"
+  | "proximo_numero_pedido_compra"
+  | "list_pedido_compra_itens"
+  | "faturamento_por_mes"
+  | "produtos_por_mes";
 
 export type Row = Record<string, unknown>;
 
