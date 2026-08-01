@@ -52,7 +52,10 @@ function HistoricoPagamentosPage() {
     );
   }, [query.data, busca]);
 
-  const { sorted, sort, toggle } = useTableSort(rows, "data_pagamento", "desc");
+  const { rows: sorted, sort, toggle } = useTableSort<Row>(rows, {
+    key: "data_pagamento",
+    dir: "desc",
+  });
 
   const totals = useMemo(() => {
     const sum = (s: string) =>
