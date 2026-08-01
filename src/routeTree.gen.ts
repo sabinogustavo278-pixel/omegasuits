@@ -13,6 +13,7 @@ import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as TernosRouteImport } from './routes/ternos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PerfisRouteImport } from './routes/perfis'
+import { Route as MeusPedidosRouteImport } from './routes/meus-pedidos'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
@@ -34,6 +35,7 @@ import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
 import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
 import { Route as CheckoutDadosRouteImport } from './routes/checkout.dados'
+import { Route as CheckoutCanceladoRouteImport } from './routes/checkout.cancelado'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 
 const UsuariosRoute = UsuariosRouteImport.update({
@@ -54,6 +56,11 @@ const ProdutosRoute = ProdutosRouteImport.update({
 const PerfisRoute = PerfisRouteImport.update({
   id: '/perfis',
   path: '/perfis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeusPedidosRoute = MeusPedidosRouteImport.update({
+  id: '/meus-pedidos',
+  path: '/meus-pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeuPerfilRoute = MeuPerfilRouteImport.update({
@@ -161,6 +168,11 @@ const CheckoutDadosRoute = CheckoutDadosRouteImport.update({
   path: '/dados',
   getParentRoute: () => CheckoutRoute,
 } as any)
+const CheckoutCanceladoRoute = CheckoutCanceladoRouteImport.update({
+  id: '/cancelado',
+  path: '/cancelado',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe/webhook',
   path: '/api/public/stripe/webhook',
@@ -183,10 +195,12 @@ export interface FileRoutesByFullPath {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
   '/checkout/dados': typeof CheckoutDadosRoute
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
@@ -211,10 +225,12 @@ export interface FileRoutesByTo {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
   '/checkout/dados': typeof CheckoutDadosRoute
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
@@ -240,10 +256,12 @@ export interface FileRoutesById {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
   '/checkout/dados': typeof CheckoutDadosRoute
   '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores_/pedido': typeof FornecedoresPedidoRoute
@@ -270,10 +288,12 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
     | '/checkout/dados'
     | '/checkout/sucesso'
     | '/fornecedores/pedido'
@@ -298,10 +318,12 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
     | '/checkout/dados'
     | '/checkout/sucesso'
     | '/fornecedores/pedido'
@@ -326,10 +348,12 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
     | '/checkout/dados'
     | '/checkout/sucesso'
     | '/fornecedores_/pedido'
@@ -355,6 +379,7 @@ export interface RootRouteChildren {
   FornecedoresRoute: typeof FornecedoresRoute
   LoginRoute: typeof LoginRoute
   MeuPerfilRoute: typeof MeuPerfilRoute
+  MeusPedidosRoute: typeof MeusPedidosRoute
   PerfisRoute: typeof PerfisRoute
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
@@ -394,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/perfis'
       fullPath: '/perfis'
       preLoaderRoute: typeof PerfisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meus-pedidos': {
+      id: '/meus-pedidos'
+      path: '/meus-pedidos'
+      fullPath: '/meus-pedidos'
+      preLoaderRoute: typeof MeusPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meu-perfil': {
@@ -543,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutDadosRouteImport
       parentRoute: typeof CheckoutRoute
     }
+    '/checkout/cancelado': {
+      id: '/checkout/cancelado'
+      path: '/cancelado'
+      fullPath: '/checkout/cancelado'
+      preLoaderRoute: typeof CheckoutCanceladoRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/api/public/stripe/webhook': {
       id: '/api/public/stripe/webhook'
       path: '/api/public/stripe/webhook'
@@ -554,11 +593,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface CheckoutRouteChildren {
+  CheckoutCanceladoRoute: typeof CheckoutCanceladoRoute
   CheckoutDadosRoute: typeof CheckoutDadosRoute
   CheckoutSucessoRoute: typeof CheckoutSucessoRoute
 }
 
 const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutCanceladoRoute: CheckoutCanceladoRoute,
   CheckoutDadosRoute: CheckoutDadosRoute,
   CheckoutSucessoRoute: CheckoutSucessoRoute,
 }
@@ -583,6 +624,7 @@ const rootRouteChildren: RootRouteChildren = {
   FornecedoresRoute: FornecedoresRoute,
   LoginRoute: LoginRoute,
   MeuPerfilRoute: MeuPerfilRoute,
+  MeusPedidosRoute: MeusPedidosRoute,
   PerfisRoute: PerfisRoute,
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
