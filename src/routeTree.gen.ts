@@ -32,6 +32,7 @@ import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-com
 import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
 import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos.configuracoes'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 
 const UsuariosRoute = UsuariosRouteImport.update({
   id: '/usuarios',
@@ -148,6 +149,11 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   path: '/fornecedores/pedido',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe/webhook',
+  path: '/api/public/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/api/public/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
   PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
   PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -492,6 +505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FornecedoresPedidoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/stripe/webhook': {
+      id: '/api/public/stripe/webhook'
+      path: '/api/public/stripe/webhook'
+      fullPath: '/api/public/stripe/webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
   PagamentosHistoricoRoute: PagamentosHistoricoRoute,
   PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
