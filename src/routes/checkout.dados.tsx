@@ -214,6 +214,16 @@ function DadosPage() {
                 </Field>
               </div>
               {erro ? <p className="mt-6 text-sm text-red-600">{erro}</p> : null}
+              {stripeUrl ? (
+                <a
+                  href={stripeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block text-[10px] uppercase tracking-[0.28em] text-accent underline"
+                >
+                  Abrir pagamento seguro do Stripe
+                </a>
+              ) : null}
             </div>
 
             <aside className="lg:sticky lg:top-28 lg:self-start">
