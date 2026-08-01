@@ -29,6 +29,7 @@ import { Route as CalcadosRouteImport } from './routes/calcados'
 import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PedidosVendaHistoricoRouteImport } from './routes/pedidos-venda.historico'
 import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-compra.historico'
 import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
 import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos.configuracoes'
@@ -138,6 +139,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidosVendaHistoricoRoute = PedidosVendaHistoricoRouteImport.update({
+  id: '/pedidos-venda/historico',
+  path: '/pedidos-venda/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidosCompraHistoricoRoute = PedidosCompraHistoricoRouteImport.update({
   id: '/pedidos-compra/historico',
   path: '/pedidos-compra/historico',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
     | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
     | '/api/public/stripe/webhook'
   id:
     | '__root__'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
     | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
   PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
   PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
+  PedidosVendaHistoricoRoute: typeof PedidosVendaHistoricoRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedidos-venda/historico': {
+      id: '/pedidos-venda/historico'
+      path: '/pedidos-venda/historico'
+      fullPath: '/pedidos-venda/historico'
+      preLoaderRoute: typeof PedidosVendaHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedidos-compra/historico': {
       id: '/pedidos-compra/historico'
       path: '/pedidos-compra/historico'
@@ -633,6 +653,7 @@ const rootRouteChildren: RootRouteChildren = {
   PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
   PagamentosHistoricoRoute: PagamentosHistoricoRoute,
   PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
+  PedidosVendaHistoricoRoute: PedidosVendaHistoricoRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
