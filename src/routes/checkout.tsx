@@ -195,32 +195,3 @@ function EmptyState() {
     </div>
   );
 }
-
-function Confirmation({
-  number,
-  onContinue,
-}: {
-  number: string;
-  onContinue: () => void;
-}) {
-  return (
-    <div className="border border-border bg-background px-8 py-20 text-center">
-      <CheckCircle2 className="mx-auto h-12 w-12 text-accent" strokeWidth={1.25} />
-      <p className="mt-6 text-[10px] uppercase tracking-[0.4em] text-accent">Pedido recebido</p>
-      <h2 className="mt-3 font-serif text-4xl text-foreground">
-        Obrigado pela sua compra
-      </h2>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Seu pedido{" "}
-        <span className="font-serif text-foreground">{number}</span> foi confirmado. Enviaremos os
-        detalhes por e-mail em instantes.
-      </p>
-      <button
-        onClick={onContinue}
-        className="mt-8 inline-flex items-center justify-center border border-foreground px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-foreground transition-colors hover:bg-foreground hover:text-background"
-      >
-        Continuar navegando
-      </button>
-    </div>
-  );
-}

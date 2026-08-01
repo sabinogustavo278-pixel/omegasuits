@@ -41,6 +41,7 @@ const groups = [
       { to: "/produtos", label: "Produtos", icon: Package },
       { to: "/estoque", label: "Estoque", icon: Warehouse },
       { to: "/clientes", label: "Clientes", icon: Users },
+      { to: "/pedidos-venda/historico", label: "Pedidos de venda", icon: Receipt },
     ],
   },
   {
