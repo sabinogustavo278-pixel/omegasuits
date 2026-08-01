@@ -128,8 +128,9 @@ function CheckoutPage() {
 
                   </ul>
                 </section>
+              </div>
 
-                            {/* Direita: resumo */}
+              {/* Direita: resumo */}
               <aside className="lg:sticky lg:top-28 lg:self-start">
                 <div className="border border-border bg-background p-6 md:p-8">
                   <h2 className="font-serif text-xl text-foreground">Resumo</h2>
