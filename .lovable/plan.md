@@ -1,49 +1,26 @@
 ## Objetivo
 
-Trocar o checkout simulado por Stripe Checkout real, coletar os dados do cliente antes do pagamento, dar baixa no estoque quando o pagamento for confirmado e criar a página de acompanhamento de pedidos do usuário logado.
+Executar uma compra real de teste com o cartão `4242 4242 4242 4242` e confirmar três coisas: retorno correto para `/checkout/sucesso`, o pedido visível em `/meus-pedidos` e o estoque decrementado.
 
-## 1. Banco de dados (uma migration)
+## Situação atual (verificada)
 
-- `clientes`: garantir vínculo com o usuário logado (`user_id` referenciando o usuário autenticado) e campos de endereço já existentes (endereço, cidade, estado, cep, cpf, telefone) — com política para o cliente ler/gravar apenas o próprio registro.
-- `pedidos_venda`: novos campos `stripe_session_id`, `stripe_payment_intent_id`, `status_entrega` e `estoque_baixado` (controle de idempotência).
-- Trilha de status de entrega padronizada: `aguardando_pagamento` → `pago` → `em_preparacao` → `enviado` → `entregue`, além de `cancelado`.
-- Nova função SQL `list_meus_pedidos()` (security definer, filtrando pelo usuário logado) devolvendo número, data, valor, status de pagamento, status de entrega e itens.
-- Função/trigger `baixar_estoque_pedido_venda()`: ao marcar o pedido como pago, subtrai as quantidades vendidas em `estoque`, registra em `estoque_movimentacoes` e marca `estoque_baixado` para não repetir.
-- GRANTs e RLS conforme o padrão do projeto.
+- As chaves do Stripe já estão salvas em modo teste (publishable `pk_test_...`, secret key e webhook secret presentes).
+- Ainda não existe nenhum pedido em `pedidos_venda` (0 registros), então qualquer pedido novo é o do teste.
+- O app não está publicado; o webhook do Stripe pode não alcançar o ambiente de preview. A confirmação também acontece pelo caminho de retorno (`confirmarPedido`), que consulta a sessão no Stripe — portanto o teste funciona mesmo sem o webhook.
 
-## 2. Fluxo de compra
+## Passos do teste
 
-1. **Sacola → `/checkout`**: revisão dos itens (mantida). O botão passa a ser “Continuar para pagamento”.
-2. Se o visitante não estiver logado, é enviado para `/login` (com retorno ao checkout).
-3. **Nova rota `/checkout/dados`**: formulário de complemento cadastral (nome, CPF, telefone, CEP, endereço, cidade, UF). Salva/atualiza o registro em `clientes` vinculado ao usuário.
-4. Ao salvar, cria o pedido em `pedidos_venda` + itens com status `aguardando_pagamento` e redireciona para o Stripe Checkout.
-5. **Retorno**: `/checkout/sucesso` (confirma o pagamento, limpa a sacola, leva ao acompanhamento) e `/checkout/cancelado`.
+1. Registrar o estoque atual dos produtos que serão comprados (consulta antes/depois para comparar).
+2. Automatizar o fluxo no navegador com sessão autenticada: vitrine → escolher tamanho → adicionar à sacola → `/checkout` → `/checkout/dados` (preencher CPF, telefone, CEP, endereço) → “Continuar para pagamento”.
+3. Na página hospedada do Stripe, preencher `4242 4242 4242 4242`, validade futura, CVC `123` e concluir o pagamento, com captura de tela em cada etapa.
+4. Verificar o retorno em `/checkout/sucesso`: número do pedido exibido, sacola limpa e status “Pagamento aprovado”.
+5. Abrir `/meus-pedidos` e confirmar que o pedido aparece com a linha do tempo no estágio correto.
+6. Conferir no banco: `pedidos_venda.status = 'pago'`, `estoque_baixado = true`, registro em `pagamentos`, movimentação em `estoque_movimentacoes` e a quantidade em `estoque` reduzida exatamente pela quantidade comprada.
 
-Os campos de cartão do checkout atual são removidos — os dados do cartão passam a ser digitados no ambiente seguro do Stripe.
+## Se algo falhar
 
-## 3. Backend
+Diagnostico e corrijo na sequência: logs da função de servidor para erros do Stripe, resposta do webhook, e o caminho de fallback de confirmação. Só ajusto código depois de identificar a causa pelos logs/telas.
 
-- `src/lib/checkout.functions.ts` (server functions autenticadas):
-  - `salvarDadosCliente` — upsert do cliente do usuário logado.
-  - `criarSessaoCheckout` — valida os itens/preços contra a tabela `produtos`, grava o pedido, cria a Stripe Checkout Session e devolve a URL.
-  - `confirmarPedido` — consulta a sessão no Stripe na volta e atualiza o pedido (fallback caso o webhook atrase).
-- `src/routes/api/public/stripe/webhook.ts` — recebe `checkout.session.completed` / `payment_intent.succeeded`, valida a assinatura com o Webhook Secret, grava em `pagamentos`, marca o pedido como pago (o que dispara a baixa de estoque).
+## Observação
 
-As chaves continuam sendo lidas de `stripe_config` no servidor; nada sensível vai ao navegador.
-
-## 4. Acompanhamento de pedidos
-
-- Nova rota `/meus-pedidos`: lista os pedidos do usuário logado com uma linha do tempo visual (Pagamento → Em preparação → Enviado → Entregue), itens, valores e filtro por status. Leitura via RPC.
-- No painel de gestão, o Histórico de Pedidos de Venda ganha a alteração de `status_entrega` (para o admin mover o pedido a caminho/entregue).
-- Login: perfil `usuario` passa a ser direcionado para `/meus-pedidos`; admin/gerente seguem para `/dashboard`.
-- Rota `/meus-pedidos` adicionada ao gerenciamento de acessos (Administrador sempre ativo) e à navegação.
-
-## 5. Configuração de pagamentos — o que falta para testar
-
-Do seu lado, na tela **Configurações Stripe**, com a conta em modo teste:
-
-- **Publishable Key** (`pk_test_...`) e **Secret Key** (`sk_test_...`) — Stripe Dashboard → Developers → API keys.
-- **Webhook Secret** (`whsec_...`) — criado após eu publicar o endpoint; eu te passo a URL do webhook para cadastrar no Stripe e você cola o secret aqui.
-- Cartão de teste (não precisa cadastrar nada): `4242 4242 4242 4242`, validade futura qualquer, CVC `123`, CEP qualquer. Recusa: `4000 0000 0000 0002`.
-
-Nenhum dado de cartão é guardado no sistema.
+O teste cria um pedido e um pagamento de teste reais no banco e no Stripe (modo teste). Posso remover o pedido de teste depois, se você quiser.

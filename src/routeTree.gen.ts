@@ -22,13 +22,13 @@ import { Route as EmpresaRouteImport } from './routes/empresa'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ClientesRouteImport } from './routes/clientes'
-import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CamisariaRouteImport } from './routes/camisaria'
 import { Route as CalcadosRouteImport } from './routes/calcados'
 import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as PedidosVendaHistoricoRouteImport } from './routes/pedidos-venda.historico'
 import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-compra.historico'
 import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
@@ -104,11 +104,6 @@ const ClientesRoute = ClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
@@ -139,6 +134,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidosVendaHistoricoRoute = PedidosVendaHistoricoRouteImport.update({
   id: '/pedidos-venda/historico',
   path: '/pedidos-venda/historico',
@@ -165,19 +165,19 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
-  id: '/sucesso',
-  path: '/sucesso',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/sucesso',
+  path: '/checkout/sucesso',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutDadosRoute = CheckoutDadosRouteImport.update({
-  id: '/dados',
-  path: '/dados',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/dados',
+  path: '/checkout/dados',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutCanceladoRoute = CheckoutCanceladoRouteImport.update({
-  id: '/cancelado',
-  path: '/cancelado',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/cancelado',
+  path: '/checkout/cancelado',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe/webhook',
@@ -192,7 +192,6 @@ export interface FileRoutesByFullPath {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -214,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
   '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -223,7 +223,6 @@ export interface FileRoutesByTo {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -245,6 +244,7 @@ export interface FileRoutesByTo {
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
   '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -255,7 +255,6 @@ export interface FileRoutesById {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -277,6 +276,7 @@ export interface FileRoutesById {
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
   '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -288,7 +288,6 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
-    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -310,6 +309,7 @@ export interface FileRouteTypes {
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
     | '/pedidos-venda/historico'
+    | '/checkout/'
     | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -319,7 +319,6 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
-    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -341,6 +340,7 @@ export interface FileRouteTypes {
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
     | '/pedidos-venda/historico'
+    | '/checkout'
     | '/api/public/stripe/webhook'
   id:
     | '__root__'
@@ -350,7 +350,6 @@ export interface FileRouteTypes {
     | '/calcados'
     | '/camisaria'
     | '/categorias'
-    | '/checkout'
     | '/clientes'
     | '/conta'
     | '/dashboard'
@@ -372,6 +371,7 @@ export interface FileRouteTypes {
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
     | '/pedidos-venda/historico'
+    | '/checkout/'
     | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -382,7 +382,6 @@ export interface RootRouteChildren {
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
   CategoriasRoute: typeof CategoriasRoute
-  CheckoutRoute: typeof CheckoutRouteWithChildren
   ClientesRoute: typeof ClientesRoute
   ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
@@ -396,11 +395,15 @@ export interface RootRouteChildren {
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
   UsuariosRoute: typeof UsuariosRoute
+  CheckoutCanceladoRoute: typeof CheckoutCanceladoRoute
+  CheckoutDadosRoute: typeof CheckoutDadosRoute
+  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
   FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
   PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
   PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
   PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
   PedidosVendaHistoricoRoute: typeof PedidosVendaHistoricoRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -497,13 +500,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/categorias': {
       id: '/categorias'
       path: '/categorias'
@@ -546,6 +542,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedidos-venda/historico': {
       id: '/pedidos-venda/historico'
       path: '/pedidos-venda/historico'
@@ -583,24 +586,24 @@ declare module '@tanstack/react-router' {
     }
     '/checkout/sucesso': {
       id: '/checkout/sucesso'
-      path: '/sucesso'
+      path: '/checkout/sucesso'
       fullPath: '/checkout/sucesso'
       preLoaderRoute: typeof CheckoutSucessoRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/checkout/dados': {
       id: '/checkout/dados'
-      path: '/dados'
+      path: '/checkout/dados'
       fullPath: '/checkout/dados'
       preLoaderRoute: typeof CheckoutDadosRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/checkout/cancelado': {
       id: '/checkout/cancelado'
-      path: '/cancelado'
+      path: '/checkout/cancelado'
       fullPath: '/checkout/cancelado'
       preLoaderRoute: typeof CheckoutCanceladoRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/stripe/webhook': {
       id: '/api/public/stripe/webhook'
@@ -612,22 +615,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface CheckoutRouteChildren {
-  CheckoutCanceladoRoute: typeof CheckoutCanceladoRoute
-  CheckoutDadosRoute: typeof CheckoutDadosRoute
-  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
-}
-
-const CheckoutRouteChildren: CheckoutRouteChildren = {
-  CheckoutCanceladoRoute: CheckoutCanceladoRoute,
-  CheckoutDadosRoute: CheckoutDadosRoute,
-  CheckoutSucessoRoute: CheckoutSucessoRoute,
-}
-
-const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
-  CheckoutRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcessoriosRoute: AcessoriosRoute,
@@ -635,7 +622,6 @@ const rootRouteChildren: RootRouteChildren = {
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
   CategoriasRoute: CategoriasRoute,
-  CheckoutRoute: CheckoutRouteWithChildren,
   ClientesRoute: ClientesRoute,
   ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
@@ -649,13 +635,27 @@ const rootRouteChildren: RootRouteChildren = {
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
   UsuariosRoute: UsuariosRoute,
+  CheckoutCanceladoRoute: CheckoutCanceladoRoute,
+  CheckoutDadosRoute: CheckoutDadosRoute,
+  CheckoutSucessoRoute: CheckoutSucessoRoute,
   FornecedoresPedidoRoute: FornecedoresPedidoRoute,
   PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
   PagamentosHistoricoRoute: PagamentosHistoricoRoute,
   PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
   PedidosVendaHistoricoRoute: PedidosVendaHistoricoRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
