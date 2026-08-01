@@ -1,46 +1,49 @@
 ## Objetivo
 
-Estrutura administrativa para o Stripe: novo grupo no menu lateral, tela de Configurações Stripe (com chaves, modo teste e teste de conexão) e tela de Histórico de Pagamentos com filtros reais.
+Trocar o checkout simulado por Stripe Checkout real, coletar os dados do cliente antes do pagamento, dar baixa no estoque quando o pagamento for confirmado e criar a página de acompanhamento de pedidos do usuário logado.
 
-## 1. Menu lateral
+## 1. Banco de dados (uma migration)
 
-Novo grupo **Gestão de Pagamentos** em `AdminShell`:
-- Configurações Stripe → `/pagamentos/configuracoes`
-- Histórico de Pagamentos → `/pagamentos/historico`
+- `clientes`: garantir vínculo com o usuário logado (`user_id` referenciando o usuário autenticado) e campos de endereço já existentes (endereço, cidade, estado, cep, cpf, telefone) — com política para o cliente ler/gravar apenas o próprio registro.
+- `pedidos_venda`: novos campos `stripe_session_id`, `stripe_payment_intent_id`, `status_entrega` e `estoque_baixado` (controle de idempotência).
+- Trilha de status de entrega padronizada: `aguardando_pagamento` → `pago` → `em_preparacao` → `enviado` → `entregue`, além de `cancelado`.
+- Nova função SQL `list_meus_pedidos()` (security definer, filtrando pelo usuário logado) devolvendo número, data, valor, status de pagamento, status de entrega e itens.
+- Função/trigger `baixar_estoque_pedido_venda()`: ao marcar o pedido como pago, subtrai as quantidades vendidas em `estoque`, registra em `estoque_movimentacoes` e marca `estoque_baixado` para não repetir.
+- GRANTs e RLS conforme o padrão do projeto.
 
-Ambas entram na matriz de acessos (`/acessos`): Administrador total (sempre ativo); Gerente somente leitura no histórico e sem acesso às chaves; Usuário sem acesso. A sidebar segue exibindo apenas o que o perfil pode ver.
+## 2. Fluxo de compra
 
-## 2. Página "Configurações Stripe"
+1. **Sacola → `/checkout`**: revisão dos itens (mantida). O botão passa a ser “Continuar para pagamento”.
+2. Se o visitante não estiver logado, é enviado para `/login` (com retorno ao checkout).
+3. **Nova rota `/checkout/dados`**: formulário de complemento cadastral (nome, CPF, telefone, CEP, endereço, cidade, UF). Salva/atualiza o registro em `clientes` vinculado ao usuário.
+4. Ao salvar, cria o pedido em `pedidos_venda` + itens com status `aguardando_pagamento` e redireciona para o Stripe Checkout.
+5. **Retorno**: `/checkout/sucesso` (confirma o pagamento, limpa a sacola, leva ao acompanhamento) e `/checkout/cancelado`.
 
-Formulário limpo (marinho/carvão/marfim + dourado) com:
-- **Publishable Key** — campo de texto normal.
-- **Secret Key** — campo tipo senha com ícone de olho (mostrar/ocultar).
-- **Webhook Secret** — campo tipo senha com ícone de olho (mostrar/ocultar).
-- **Toggle "Modo Teste"** — liga/desliga; grava o ambiente (`teste` / `producao`).
-- Rodapé com três ações lado a lado: **Salvar Chaves**, **Testar Conexão** e indicador da última atualização.
+Os campos de cartão do checkout atual são removidos — os dados do cartão passam a ser digitados no ambiente seguro do Stripe.
 
-Conforme pedido, os três campos ficam na tabela `stripe_config`. Registro obrigatório: as chaves ficam gravadas no banco, então a proteção depende inteiramente da RLS — a tabela só é legível/gravável por Administrador (e nunca por visitante anônimo), e o Gerente não tem acesso a esta tela. Ainda assim, quem tiver acesso direto ao banco verá a Secret Key; recomendo usar chaves de teste (`sk_test_...`) enquanto o projeto está em desenvolvimento e, quando for para produção, mover a Secret Key para o cofre de segredos. Ao carregar a tela, a Secret Key e o Webhook Secret vêm mascarados (`sk_test_••••1234`) e só são reenviados ao banco se você digitar um novo valor.
+## 3. Backend
 
-**Testar Conexão**: chama uma server function (`createServerFn`) que valida a Secret Key gravada contra a API do Stripe (`GET /v1/balance`) e retorna sucesso com o nome/ID da conta e o modo detectado (teste ou produção), ou a mensagem de erro do Stripe. A chave nunca trafega de volta para o navegador. A função também avisa se o modo detectado não bate com o toggle "Modo Teste".
+- `src/lib/checkout.functions.ts` (server functions autenticadas):
+  - `salvarDadosCliente` — upsert do cliente do usuário logado.
+  - `criarSessaoCheckout` — valida os itens/preços contra a tabela `produtos`, grava o pedido, cria a Stripe Checkout Session e devolve a URL.
+  - `confirmarPedido` — consulta a sessão no Stripe na volta e atualiza o pedido (fallback caso o webhook atrase).
+- `src/routes/api/public/stripe/webhook.ts` — recebe `checkout.session.completed` / `payment_intent.succeeded`, valida a assinatura com o Webhook Secret, grava em `pagamentos`, marca o pedido como pago (o que dispara a baixa de estoque).
 
-## 3. Página "Histórico de Pagamentos"
+As chaves continuam sendo lidas de `stripe_config` no servidor; nada sensível vai ao navegador.
 
-Tabela no padrão do sistema (classificação no cabeçalho, thumbnail do cliente, filtro de texto) com as colunas **Data, Cliente, Pedido, Valor R$, Status**.
+## 4. Acompanhamento de pedidos
 
-Crio a tabela `pagamentos` (FKs para `pedidos_venda` e `clientes`), com status (aprovado, pendente, recusado, estornado), valor, moeda, método e as referências do Stripe (payment intent / charge) já previstas. Leitura via RPC `list_pagamentos`.
+- Nova rota `/meus-pedidos`: lista os pedidos do usuário logado com uma linha do tempo visual (Pagamento → Em preparação → Enviado → Entregue), itens, valores e filtro por status. Leitura via RPC.
+- No painel de gestão, o Histórico de Pedidos de Venda ganha a alteração de `status_entrega` (para o admin mover o pedido a caminho/entregue).
+- Login: perfil `usuario` passa a ser direcionado para `/meus-pedidos`; admin/gerente seguem para `/dashboard`.
+- Rota `/meus-pedidos` adicionada ao gerenciamento de acessos (Administrador sempre ativo) e à navegação.
 
-## 4. Filtros funcionais
+## 5. Configuração de pagamentos — o que falta para testar
 
-No topo do histórico:
-- **Status**: Todos / Aprovado / Pendente / Recusado / Estornado
-- **Período**: Data Inicial e Data Final
+Do seu lado, na tela **Configurações Stripe**, com a conta em modo teste:
 
-Passados como parâmetros da RPC, atualizando a tabela automaticamente a cada mudança. Cartões de resumo (total aprovado, pendente, estornado) respeitam os mesmos filtros.
+- **Publishable Key** (`pk_test_...`) e **Secret Key** (`sk_test_...`) — Stripe Dashboard → Developers → API keys.
+- **Webhook Secret** (`whsec_...`) — criado após eu publicar o endpoint; eu te passo a URL do webhook para cadastrar no Stripe e você cola o secret aqui.
+- Cartão de teste (não precisa cadastrar nada): `4242 4242 4242 4242`, validade futura qualquer, CVC `123`, CEP qualquer. Recusa: `4000 0000 0000 0002`.
 
-## Detalhes técnicos
-
-- Migration: `stripe_config` (linha única: `publishable_key`, `secret_key`, `webhook_secret`, `modo_teste boolean`, `updated_at`) e `pagamentos`, com GRANTs, RLS restrita e trigger de `updated_at`; RPC `get_stripe_config` devolvendo as chaves sensíveis já mascaradas, e `list_pagamentos(_status, _data_inicio, _data_fim)`.
-- Server function `testarConexaoStripe` em `src/lib/stripe.functions.ts`, lendo a chave do banco no servidor.
-- Novas rotas: `src/routes/pagamentos.configuracoes.tsx` e `src/routes/pagamentos.historico.tsx`, cada uma com `head()` próprio.
-- `src/lib/db.ts`: novos nomes de RPC e tabela.
-- Nenhum checkout/cobrança Stripe nesta etapa — apenas a estrutura administrativa.
+Nenhum dado de cartão é guardado no sistema.
