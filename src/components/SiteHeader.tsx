@@ -62,14 +62,23 @@ export function SiteHeader() {
             ) : null}
           </Link>
           {authed ? (
-            <Link
-              to="/meu-perfil"
-              aria-label="Meu perfil"
-              className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
-            >
-              <User className="h-4 w-4" strokeWidth={1.25} />
-              <span className="hidden sm:inline">Meu perfil</span>
-            </Link>
+            <>
+              <Link
+                to="/meus-pedidos"
+                aria-label="Meus pedidos"
+                className="hidden items-center gap-2 transition-colors hover:text-foreground sm:inline-flex"
+              >
+                <span>Meus pedidos</span>
+              </Link>
+              <Link
+                to="/meu-perfil"
+                aria-label="Meu perfil"
+                className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+              >
+                <User className="h-4 w-4" strokeWidth={1.25} />
+                <span className="hidden sm:inline">Meu perfil</span>
+              </Link>
+            </>
           ) : (
             <Link
               to="/login"
