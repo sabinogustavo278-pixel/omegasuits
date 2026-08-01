@@ -15,6 +15,8 @@ import {
   KeyRound,
   Building2,
   UserRound,
+  CreditCard,
+  Receipt,
 } from "lucide-react";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { RoleGate } from "./RoleGate";
@@ -47,6 +49,13 @@ const groups = [
       { to: "/usuarios", label: "Usuários", icon: UserCog },
       { to: "/perfis", label: "Perfis", icon: ShieldCheck },
       { to: "/acessos", label: "Acessos", icon: KeyRound },
+    ],
+  },
+  {
+    label: "Gestão de Pagamentos",
+    items: [
+      { to: "/pagamentos/configuracoes", label: "Configurações Stripe", icon: CreditCard },
+      { to: "/pagamentos/historico", label: "Histórico de pagamentos", icon: Receipt },
     ],
   },
   {

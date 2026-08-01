@@ -29,6 +29,8 @@ import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-compra.historico'
+import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
+import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos.configuracoes'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
 
 const UsuariosRoute = UsuariosRouteImport.update({
@@ -131,6 +133,16 @@ const PedidosCompraHistoricoRoute = PedidosCompraHistoricoRouteImport.update({
   path: '/pedidos-compra/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PagamentosHistoricoRoute = PagamentosHistoricoRouteImport.update({
+  id: '/pagamentos/historico',
+  path: '/pagamentos/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagamentosConfiguracoesRoute = PagamentosConfiguracoesRouteImport.update({
+  id: '/pagamentos/configuracoes',
+  path: '/pagamentos/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   id: '/fornecedores_/pedido',
   path: '/fornecedores/pedido',
@@ -158,6 +170,8 @@ export interface FileRoutesByFullPath {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
+  '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
+  '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRoutesByTo {
@@ -181,6 +195,8 @@ export interface FileRoutesByTo {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
+  '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
+  '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRoutesById {
@@ -205,6 +221,8 @@ export interface FileRoutesById {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/fornecedores_/pedido': typeof FornecedoresPedidoRoute
+  '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
+  '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
 }
 export interface FileRouteTypes {
@@ -230,6 +248,8 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores/pedido'
+    | '/pagamentos/configuracoes'
+    | '/pagamentos/historico'
     | '/pedidos-compra/historico'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -253,6 +273,8 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores/pedido'
+    | '/pagamentos/configuracoes'
+    | '/pagamentos/historico'
     | '/pedidos-compra/historico'
   id:
     | '__root__'
@@ -276,6 +298,8 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/fornecedores_/pedido'
+    | '/pagamentos/configuracoes'
+    | '/pagamentos/historico'
     | '/pedidos-compra/historico'
   fileRoutesById: FileRoutesById
 }
@@ -300,6 +324,8 @@ export interface RootRouteChildren {
   TernosRoute: typeof TernosRoute
   UsuariosRoute: typeof UsuariosRoute
   FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
+  PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
+  PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
   PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
 }
 
@@ -445,6 +471,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PedidosCompraHistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pagamentos/historico': {
+      id: '/pagamentos/historico'
+      path: '/pagamentos/historico'
+      fullPath: '/pagamentos/historico'
+      preLoaderRoute: typeof PagamentosHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pagamentos/configuracoes': {
+      id: '/pagamentos/configuracoes'
+      path: '/pagamentos/configuracoes'
+      fullPath: '/pagamentos/configuracoes'
+      preLoaderRoute: typeof PagamentosConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fornecedores_/pedido': {
       id: '/fornecedores_/pedido'
       path: '/fornecedores/pedido'
@@ -476,18 +516,10 @@ const rootRouteChildren: RootRouteChildren = {
   TernosRoute: TernosRoute,
   UsuariosRoute: UsuariosRoute,
   FornecedoresPedidoRoute: FornecedoresPedidoRoute,
+  PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
+  PagamentosHistoricoRoute: PagamentosHistoricoRoute,
   PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

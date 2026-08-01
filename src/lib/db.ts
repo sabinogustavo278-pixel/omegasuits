@@ -16,7 +16,9 @@ type RpcName =
   | "proximo_numero_pedido_compra"
   | "list_pedido_compra_itens"
   | "faturamento_por_mes"
-  | "produtos_por_mes";
+  | "produtos_por_mes"
+  | "get_stripe_config"
+  | "list_pagamentos";
 
 export type Row = Record<string, unknown>;
 
@@ -51,7 +53,9 @@ export type TableName =
   | "pedidos_venda"
   | "pedidos_venda_itens"
   | "produtos_imagens"
-  | "empresa_config";
+  | "empresa_config"
+  | "stripe_config"
+  | "pagamentos";
 
 type QueryLike = {
   insert: (v: Row | Row[]) => Promise<{ error: { message: string } | null }>;

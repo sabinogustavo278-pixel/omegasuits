@@ -330,6 +330,69 @@ export type Database = {
         }
         Relationships: []
       }
+      pagamentos: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          data_pagamento: string
+          id: string
+          metodo: string | null
+          moeda: string
+          observacoes: string | null
+          pedido_id: string | null
+          status: string
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          data_pagamento?: string
+          id?: string
+          metodo?: string | null
+          moeda?: string
+          observacoes?: string | null
+          pedido_id?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          data_pagamento?: string
+          id?: string
+          metodo?: string | null
+          moeda?: string
+          observacoes?: string | null
+          pedido_id?: string | null
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos_venda"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pedidos_compra: {
         Row: {
           condicao_pagamento: string | null
@@ -722,6 +785,36 @@ export type Database = {
           },
         ]
       }
+      stripe_config: {
+        Row: {
+          created_at: string
+          id: string
+          modo_teste: boolean
+          publishable_key: string
+          secret_key: string
+          updated_at: string
+          webhook_secret: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          modo_teste?: boolean
+          publishable_key?: string
+          secret_key?: string
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          modo_teste?: boolean
+          publishable_key?: string
+          secret_key?: string
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -821,6 +914,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_stripe_config: {
+        Args: never
+        Returns: {
+          id: string
+          modo_teste: boolean
+          publishable_key: string
+          secret_key_mask: string
+          tem_secret_key: boolean
+          tem_webhook_secret: boolean
+          updated_at: string
+          webhook_secret_mask: string
+        }[]
+      }
       has_profile: {
         Args: { _profile_name: string; _user_id: string }
         Returns: boolean
@@ -914,6 +1020,24 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      list_pagamentos: {
+        Args: { _data_fim?: string; _data_inicio?: string; _status?: string }
+        Returns: {
+          cliente: string
+          cliente_id: string
+          created_at: string
+          data_pagamento: string
+          id: string
+          imagem_url: string
+          metodo: string
+          moeda: string
+          pedido: string
+          pedido_id: string
+          status: string
+          stripe_payment_intent_id: string
+          valor: number
+        }[]
       }
       list_pedido_compra_itens: {
         Args: { _pedido_id: string }
@@ -1021,6 +1145,7 @@ export type Database = {
           tamanho: string
         }[]
       }
+      mask_secret: { Args: { _value: string }; Returns: string }
       produtos_por_mes: {
         Args: never
         Returns: {
