@@ -65,7 +65,7 @@ function PedidosVendaPage() {
     });
   }, [pedidos.data, busca, status]);
 
-  const { sorted, sortProps } = useTableSort(filtrados);
+  const { rows: sorted, sort, toggle } = useTableSort(filtrados);
 
   const total = filtrados.reduce((s, p) => s + Number(p.valor_total ?? 0), 0);
   const pagos = filtrados.filter((p) => String(p.status) === "pago").length;
@@ -97,18 +97,17 @@ function PedidosVendaPage() {
       <div className="mt-6">
         <DataTable
           columns={[
-            { key: "numero", label: "Número" },
-            { key: "cliente", label: "Cliente" },
-            { key: "data_pedido", label: "Data" },
-            { key: "status", label: "Pagamento" },
-            { key: "valor_total", label: "Valor" },
-            { key: "acao", label: "Entrega", sortable: false },
+            { label: "Número", sortKey: "numero" },
+            { label: "Cliente", sortKey: "cliente" },
+            { label: "Data", sortKey: "data_pedido" },
+            { label: "Pagamento", sortKey: "status" },
+            { label: "Valor", sortKey: "valor_total" },
+            { label: "Entrega" },
           ]}
-          sortProps={sortProps}
-          loading={pedidos.isLoading}
-          empty="Nenhum pedido de venda encontrado."
+          sort={sort}
+          onSort={toggle}
         >
-          {sorted.map((p) => (
+          {sorted.map((p: Row) => (
             <tr key={String(p.id)} className="border-b border-border last:border-0">
               <td className="px-4 py-3 text-sm text-foreground">{String(p.numero ?? "")}</td>
               <td className="px-4 py-3 text-sm text-foreground">{String(p.cliente ?? "—")}</td>
@@ -145,6 +144,11 @@ function PedidosVendaPage() {
             </tr>
           ))}
         </DataTable>
+        {!pedidos.isLoading && sorted.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Nenhum pedido de venda encontrado.
+          </p>
+        ) : null}
       </div>
     </AdminShell>
   );
