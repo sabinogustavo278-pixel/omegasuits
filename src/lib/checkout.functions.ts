@@ -40,9 +40,11 @@ export const criarSessaoCheckout = createServerFn({ method: "POST" })
     return criarSessao(context.userId, data.itens, data.origin);
   });
 
-/** Confirma o pagamento na volta do Stripe (fallback caso o webhook atrase). */
+/** Confirma o pagamento na volta do Stripe (fallback caso o webhook atrase).
+ *  Sem middleware de auth: a volta do Stripe abre uma janela nova, que pode
+ *  ainda não ter a sessão hidratada. A autorização vem do próprio session_id
+ *  do Stripe, que é validado contra a API antes de qualquer atualização. */
 export const confirmarPedido = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((data: { sessionId: string }) => data)
   .handler(
     async ({
