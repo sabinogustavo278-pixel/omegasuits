@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Omega Suits — Alfaiataria masculina clássica" },
       {
         property: "og:description",
-        content: "Ternos, camisaria, calçados e acessórios da nova coleção de alfaiataria.",
+        content: "Ternos sob medida, camisaria fina, calçados Goodyear e acessórios em seda pura. Conheça a coleção Omega Suits.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

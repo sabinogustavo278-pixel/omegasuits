@@ -75,24 +75,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Omega Suits — Alfaiataria Clássica Masculina" },
+      { title: "Omega Suits — Alfaiataria masculina clássica" },
       {
         name: "description",
         content:
-          "Omega Suits — alfaiataria masculina clássica. Ternos sob medida, camisaria, calçados e acessórios de luxo confeccionados com material excepcional.",
+          "Ternos sob medida, camisaria fina, calçados Goodyear e acessórios em seda pura. Conheça a coleção Omega Suits.",
       },
       { name: "author", content: "Omega Suits" },
-      { property: "og:title", content: "Omega Suits — Alfaiataria Clássica Masculina" },
+      { property: "og:title", content: "Omega Suits — Alfaiataria masculina clássica" },
       {
         property: "og:description",
-        content: "Ternos sob medida, camisaria e acessórios de luxo.",
+        content: "Ternos sob medida, camisaria fina, calçados Goodyear e acessórios em seda pura. Conheça a coleção Omega Suits.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Omega Suits — Alfaiataria masculina clássica" },
+      { name: "twitter:description", content: "Ternos sob medida, camisaria fina, calçados Goodyear e acessórios em seda pura. Conheça a coleção Omega Suits." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af82db34-5c04-4658-9523-8be56a2847bd/id-preview-9608108d--efefb465-9a69-40cb-8119-47682c3fd370.lovable.app-1785611538892.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/af82db34-5c04-4658-9523-8be56a2847bd/id-preview-9608108d--efefb465-9a69-40cb-8119-47682c3fd370.lovable.app-1785611538892.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
