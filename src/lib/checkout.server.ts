@@ -6,27 +6,49 @@ type AnyClient = {
 
 export type StripeKeys = { secret: string; webhook: string; modoTeste: boolean };
 
-/** Lê as chaves do Stripe gravadas em stripe_config (nunca vão ao navegador). */
+/** Lê as chaves do Stripe. Prioriza os secrets do projeto e, se ausentes,
+ *  cai para a tabela stripe_config (nunca vão ao navegador). */
 export async function getStripeKeys(): Promise<StripeKeys> {
-  const { data, error } = await (supabaseAdmin as unknown as AnyClient)
-    .from("stripe_config")
-    .select("secret_key, webhook_secret, modo_teste")
-    .order("created_at")
-    .limit(1);
-  if (error) throw new Error("Não foi possível ler as configurações do Stripe.");
-  const row = data?.[0];
-  const secret = String(row?.secret_key ?? "").trim();
+  const envSecret = String(process.env.STRIPE_SECRET_KEY ?? "").trim();
+  const envWebhook = String(process.env.STRIPE_WEBHOOK_SECRET ?? "").trim();
+
+  let rowSecret = "";
+  let rowWebhook = "";
+  let modoTeste: boolean | null = null;
+
+  if (!envSecret || !envWebhook) {
+    try {
+      const { data, error } = await (supabaseAdmin as unknown as AnyClient)
+        .from("stripe_config")
+        .select("secret_key, webhook_secret, modo_teste")
+        .order("created_at")
+        .limit(1);
+      if (error) throw new Error(error.message);
+      const row = data?.[0];
+      rowSecret = String(row?.secret_key ?? "").trim();
+      rowWebhook = String(row?.webhook_secret ?? "").trim();
+      modoTeste = row?.modo_teste ?? null;
+    } catch (err) {
+      console.error("[stripe] falha ao ler stripe_config:", (err as Error).message);
+    }
+  }
+
+  const secret = envSecret || rowSecret;
+  const webhook = envWebhook || rowWebhook;
+
   if (!secret) {
     throw new Error(
       "Nenhuma Secret Key do Stripe configurada. Preencha em Gestão de Pagamentos › Configurações Stripe.",
     );
   }
+
   return {
     secret,
-    webhook: String(row?.webhook_secret ?? "").trim(),
-    modoTeste: Boolean(row?.modo_teste ?? true),
+    webhook,
+    modoTeste: modoTeste ?? secret.includes("_test_"),
   };
 }
+
 
 /** Chamada genérica à API do Stripe (form-urlencoded). */
 export async function stripeRequest(
@@ -55,13 +77,10 @@ export function admin() {
 
 /** Gera o próximo número de pedido de venda. */
 export async function proximoNumeroVenda(): Promise<string> {
-  const { data } = await admin()
-    .from("pedidos_venda")
-    .select("id", { count: "exact", head: true });
-  void data;
   const random = Math.floor(Math.random() * 900000) + 100000;
   return `OM-${new Date().getFullYear()}-${random}`;
 }
+
 
 /** Marca o pedido como pago (o trigger dá baixa no estoque) e registra o pagamento. */
 export async function confirmarPagamento(opts: {

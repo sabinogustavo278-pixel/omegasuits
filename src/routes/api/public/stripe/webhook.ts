@@ -15,10 +15,15 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
         let keys;
         try {
           keys = await getStripeKeys();
-        } catch {
-          return new Response("Stripe não configurado", { status: 503 });
+        } catch (err) {
+          console.error("[stripe-webhook] configuração indisponível:", (err as Error).message);
+          // 500 faz o Stripe reenviar o evento depois, em vez de descartá-lo.
+          return new Response("Stripe não configurado", { status: 500 });
         }
-        if (!keys.webhook) return new Response("Webhook secret ausente", { status: 503 });
+        if (!keys.webhook) {
+          console.error("[stripe-webhook] webhook secret ausente");
+          return new Response("Webhook secret ausente", { status: 500 });
+        }
 
         // Verificação da assinatura do Stripe (t=...,v1=...)
         const parts = Object.fromEntries(
@@ -45,6 +50,7 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
           return new Response("Assinatura inválida", { status: 401 });
         }
 
+
         let evento: any;
         try {
           evento = JSON.parse(raw);
@@ -54,6 +60,7 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
 
         const tipo = String(evento?.type ?? "");
         const obj = evento?.data?.object ?? {};
+        console.log("[stripe-webhook] evento recebido:", tipo, evento?.id ?? "");
 
         try {
           if (tipo === "checkout.session.completed" || tipo === "checkout.session.async_payment_succeeded") {
@@ -65,12 +72,16 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
                   typeof obj.payment_intent === "string"
                     ? obj.payment_intent
                     : (obj.payment_intent?.id ?? null);
-                await confirmarPagamento({
+                // confirmarPagamento é idempotente: se o pedido já estiver pago, não repete.
+                const r = await confirmarPagamento({
                   pedidoId: String(pedidoId),
                   paymentIntentId: pi,
                   valor: Number(obj.amount_total ?? 0) / 100,
                   metodo: "stripe",
                 });
+                console.log("[stripe-webhook] pedido", pedidoId, "->", r.mensagem);
+              } else {
+                console.warn("[stripe-webhook] sessão paga sem pedido_id:", obj.id);
               }
             }
           } else if (
@@ -79,16 +90,19 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
           ) {
             const pedidoId = obj.metadata?.pedido_id ?? obj.client_reference_id ?? null;
             if (pedidoId) {
+              // Nunca cancela um pedido já pago (eventos podem chegar fora de ordem).
               await admin()
                 .from("pedidos_venda")
                 .update({ status: "cancelado", status_entrega: "cancelado" })
-                .eq("id", String(pedidoId));
+                .eq("id", String(pedidoId))
+                .neq("status", "pago");
             }
           }
         } catch (err) {
           console.error("[stripe-webhook]", (err as Error).message);
           return new Response("Erro ao processar", { status: 500 });
         }
+
 
         return new Response("ok");
       },
