@@ -72,7 +72,7 @@ function DadosPage() {
 
   useEffect(() => {
     if (sessionLoading) return;
-    if (!session) navigate({ to: "/login", search: { redirect: "/checkout/dados" } as never });
+    if (!session) navigate({ to: "/login" });
   }, [session, sessionLoading, navigate]);
 
   useEffect(() => {
