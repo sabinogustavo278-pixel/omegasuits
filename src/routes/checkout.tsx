@@ -173,30 +173,6 @@ function CheckoutPage() {
   );
 }
 
-const inputCls =
-  "w-full border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-foreground";
-
-function Field({
-  label,
-  error,
-  className,
-  children,
-}: {
-  label: string;
-  error?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <label className="mb-2 block text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
-        {label}
-      </label>
-      {children}
-      {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
-    </div>
-  );
-}
 
 function EmptyState() {
   return (
