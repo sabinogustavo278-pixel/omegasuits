@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { User, LogIn, ShoppingBag } from "lucide-react";
 import { useIsAuthenticated } from "@/lib/mock-auth";
 import { useCart } from "@/lib/mock-cart";
@@ -13,6 +14,9 @@ const nav = [
 export function SiteHeader() {
   const authed = useIsAuthenticated();
   const { count } = useCart();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto grid max-w-7xl grid-cols-3 items-center px-6 py-5 md:px-10">
@@ -55,7 +59,7 @@ export function SiteHeader() {
             className="relative inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >
             <ShoppingBag className="h-4 w-4" strokeWidth={1.25} />
-            {count > 0 ? (
+            {hydrated && count > 0 ? (
               <span className="absolute -right-3 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-medium tracking-normal text-charcoal">
                 {count}
               </span>
