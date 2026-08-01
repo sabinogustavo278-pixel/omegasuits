@@ -15,10 +15,15 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
         let keys;
         try {
           keys = await getStripeKeys();
-        } catch {
-          return new Response("Stripe não configurado", { status: 503 });
+        } catch (err) {
+          console.error("[stripe-webhook] configuração indisponível:", (err as Error).message);
+          // 500 faz o Stripe reenviar o evento depois, em vez de descartá-lo.
+          return new Response("Stripe não configurado", { status: 500 });
         }
-        if (!keys.webhook) return new Response("Webhook secret ausente", { status: 503 });
+        if (!keys.webhook) {
+          console.error("[stripe-webhook] webhook secret ausente");
+          return new Response("Webhook secret ausente", { status: 500 });
+        }
 
         // Verificação da assinatura do Stripe (t=...,v1=...)
         const parts = Object.fromEntries(
@@ -44,6 +49,7 @@ export const Route = createFileRoute("/api/public/stripe/webhook")({
         if (a.length !== b.length || !timingSafeEqual(a, b)) {
           return new Response("Assinatura inválida", { status: 401 });
         }
+
 
         let evento: any;
         try {
