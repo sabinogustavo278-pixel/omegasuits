@@ -1,26 +1,23 @@
-## Objetivo
+## Diagnóstico
 
-Executar uma compra real de teste com o cartão `4242 4242 4242 4242` e confirmar três coisas: retorno correto para `/checkout/sucesso`, o pedido visível em `/meus-pedidos` e o estoque decrementado.
+Os logs do servidor não mostram nenhum erro na criação da sessão de checkout — a sessão do Stripe é criada normalmente. O travamento acontece no último passo do fluxo, no navegador.
 
-## Situação atual (verificada)
+Em `src/routes/checkout.dados.tsx` o pagamento termina com:
 
-- As chaves do Stripe já estão salvas em modo teste (publishable `pk_test_...`, secret key e webhook secret presentes).
-- Ainda não existe nenhum pedido em `pedidos_venda` (0 registros), então qualquer pedido novo é o do teste.
-- O app não está publicado; o webhook do Stripe pode não alcançar o ambiente de preview. A confirmação também acontece pelo caminho de retorno (`confirmarPedido`), que consulta a sessão no Stripe — portanto o teste funciona mesmo sem o webhook.
+```text
+window.location.href = url;   // url = checkout.stripe.com/...
+```
 
-## Passos do teste
+O app roda dentro do iframe do preview do Lovable, e o Stripe Checkout não permite ser carregado em iframe. Resultado: a navegação é bloqueada, nada acontece na tela, e como `setEnviando(false)` só existe no `catch`, o botão fica com o spinner "Redirecionando" indefinidamente.
 
-1. Registrar o estoque atual dos produtos que serão comprados (consulta antes/depois para comparar).
-2. Automatizar o fluxo no navegador com sessão autenticada: vitrine → escolher tamanho → adicionar à sacola → `/checkout` → `/checkout/dados` (preencher CPF, telefone, CEP, endereço) → “Continuar para pagamento”.
-3. Na página hospedada do Stripe, preencher `4242 4242 4242 4242`, validade futura, CVC `123` e concluir o pagamento, com captura de tela em cada etapa.
-4. Verificar o retorno em `/checkout/sucesso`: número do pedido exibido, sacola limpa e status “Pagamento aprovado”.
-5. Abrir `/meus-pedidos` e confirmar que o pedido aparece com a linha do tempo no estágio correto.
-6. Conferir no banco: `pedidos_venda.status = 'pago'`, `estoque_baixado = true`, registro em `pagamentos`, movimentação em `estoque_movimentacoes` e a quantidade em `estoque` reduzida exatamente pela quantidade comprada.
+## Correção
 
-## Se algo falhar
+Em `src/routes/checkout.dados.tsx`, na função `submit`:
 
-Diagnostico e corrijo na sequência: logs da função de servidor para erros do Stripe, resposta do webhook, e o caminho de fallback de confirmação. Só ajusto código depois de identificar a causa pelos logs/telas.
+1. Navegar a janela de topo em vez do iframe: usar `window.top?.location.assign(url)` com fallback para `window.location.assign(url)` quando não houver iframe.
+2. Se a navegação de topo não for permitida (erro de cross-origin), abrir o Stripe em nova aba (`window.open(url, "_blank")`).
+3. Sempre liberar o estado do botão depois de disparar o redirecionamento (`setEnviando(false)`), e mostrar um link visível "Abrir pagamento seguro do Stripe" com a URL da sessão, caso o navegador bloqueie o pop-up — assim o usuário nunca fica preso na tela.
 
-## Observação
+## Detalhe técnico
 
-O teste cria um pedido e um pagamento de teste reais no banco e no Stripe (modo teste). Posso remover o pedido de teste depois, se você quiser.
+Nenhuma mudança de banco, server function ou lógica de negócio: a sessão, o pedido e o webhook continuam iguais. A alteração é apenas na camada de apresentação/redirecionamento do checkout.

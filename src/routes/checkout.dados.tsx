@@ -68,7 +68,9 @@ function DadosPage() {
     estado: "",
   });
   const [erro, setErro] = useState<string | null>(null);
+  const [stripeUrl, setStripeUrl] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -95,6 +97,24 @@ function DadosPage() {
 
   const set = (k: keyof typeof form, v: string) => setForm((s) => ({ ...s, [k]: v }));
 
+  function irParaStripe(url: string) {
+    // O Stripe Checkout não pode ser exibido dentro de iframe (preview do Lovable).
+    // Navegamos a janela de topo; se o navegador bloquear, abrimos em nova aba.
+    try {
+      const emIframe = window.top && window.top !== window.self;
+      if (emIframe) {
+        window.top!.location.assign(url);
+      } else {
+        window.location.assign(url);
+      }
+      return;
+    } catch {
+      const aba = window.open(url, "_blank", "noopener,noreferrer");
+      if (aba) return;
+    }
+    setErro("Seu navegador bloqueou a abertura automática. Use o link abaixo para pagar.");
+  }
+
   async function submit(ev: React.FormEvent) {
     ev.preventDefault();
     setErro(null);
@@ -111,12 +131,15 @@ function DadosPage() {
           origin: window.location.origin,
         },
       });
-      window.location.href = url;
+      setStripeUrl(url);
+      irParaStripe(url);
     } catch (err) {
       setErro((err as Error).message ?? "Não foi possível seguir para o pagamento.");
+    } finally {
       setEnviando(false);
     }
   }
+
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -191,6 +214,16 @@ function DadosPage() {
                 </Field>
               </div>
               {erro ? <p className="mt-6 text-sm text-red-600">{erro}</p> : null}
+              {stripeUrl ? (
+                <a
+                  href={stripeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block text-[10px] uppercase tracking-[0.28em] text-accent underline"
+                >
+                  Abrir pagamento seguro do Stripe
+                </a>
+              ) : null}
             </div>
 
             <aside className="lg:sticky lg:top-28 lg:self-start">
