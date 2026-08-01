@@ -7,7 +7,7 @@ import { removeFromCart, updateQty, useCart } from "@/lib/mock-cart";
 import { Minus, Plus, Trash2, ShoppingBag, Lock } from "lucide-react";
 import { useSession } from "@/lib/mock-auth";
 
-export const Route = createFileRoute("/checkout")({
+export const Route = createFileRoute("/checkout/")({
   head: () => ({
     meta: [
       { title: "Checkout — Omega Suits" },
