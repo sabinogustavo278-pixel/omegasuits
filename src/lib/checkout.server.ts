@@ -77,13 +77,10 @@ export function admin() {
 
 /** Gera o próximo número de pedido de venda. */
 export async function proximoNumeroVenda(): Promise<string> {
-  const { data } = await admin()
-    .from("pedidos_venda")
-    .select("id", { count: "exact", head: true });
-  void data;
   const random = Math.floor(Math.random() * 900000) + 100000;
   return `OM-${new Date().getFullYear()}-${random}`;
 }
+
 
 /** Marca o pedido como pago (o trigger dá baixa no estoque) e registra o pagamento. */
 export async function confirmarPagamento(opts: {
