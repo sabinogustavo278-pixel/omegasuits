@@ -78,7 +78,7 @@ function LoginPage() {
     if (role === "admin" || role === "gerente") {
       navigate({ to: "/dashboard" });
     } else {
-      navigate({ to: "/" });
+      navigate({ to: "/meus-pedidos" });
     }
   }
 

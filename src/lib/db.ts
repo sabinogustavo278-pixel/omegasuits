@@ -10,6 +10,7 @@ type RpcName =
   | "list_pedidos_compra"
   | "list_pedidos_venda"
   | "list_pedidos_cliente"
+  | "list_meus_pedidos"
   | "dashboard_metrics"
   | "list_produto_imagens"
   | "get_empresa_config"

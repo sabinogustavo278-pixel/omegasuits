@@ -13,6 +13,7 @@ import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as TernosRouteImport } from './routes/ternos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PerfisRouteImport } from './routes/perfis'
+import { Route as MeusPedidosRouteImport } from './routes/meus-pedidos'
 import { Route as MeuPerfilRouteImport } from './routes/meu-perfil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FornecedoresRouteImport } from './routes/fornecedores'
@@ -28,10 +29,15 @@ import { Route as CalcadosRouteImport } from './routes/calcados'
 import { Route as AcessosRouteImport } from './routes/acessos'
 import { Route as AcessoriosRouteImport } from './routes/acessorios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PedidosVendaHistoricoRouteImport } from './routes/pedidos-venda.historico'
 import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-compra.historico'
 import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
 import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos.configuracoes'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
+import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
+import { Route as CheckoutDadosRouteImport } from './routes/checkout.dados'
+import { Route as CheckoutCanceladoRouteImport } from './routes/checkout.cancelado'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 
 const UsuariosRoute = UsuariosRouteImport.update({
   id: '/usuarios',
@@ -51,6 +57,11 @@ const ProdutosRoute = ProdutosRouteImport.update({
 const PerfisRoute = PerfisRouteImport.update({
   id: '/perfis',
   path: '/perfis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeusPedidosRoute = MeusPedidosRouteImport.update({
+  id: '/meus-pedidos',
+  path: '/meus-pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeuPerfilRoute = MeuPerfilRouteImport.update({
@@ -128,6 +139,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidosVendaHistoricoRoute = PedidosVendaHistoricoRouteImport.update({
+  id: '/pedidos-venda/historico',
+  path: '/pedidos-venda/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidosCompraHistoricoRoute = PedidosCompraHistoricoRouteImport.update({
   id: '/pedidos-compra/historico',
   path: '/pedidos-compra/historico',
@@ -148,6 +164,26 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   path: '/fornecedores/pedido',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
+  id: '/sucesso',
+  path: '/sucesso',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const CheckoutDadosRoute = CheckoutDadosRouteImport.update({
+  id: '/dados',
+  path: '/dados',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const CheckoutCanceladoRoute = CheckoutCanceladoRouteImport.update({
+  id: '/cancelado',
+  path: '/cancelado',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe/webhook',
+  path: '/api/public/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,7 +192,7 @@ export interface FileRoutesByFullPath {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -165,14 +201,20 @@ export interface FileRoutesByFullPath {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
+  '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,7 +223,7 @@ export interface FileRoutesByTo {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -190,14 +232,20 @@ export interface FileRoutesByTo {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
+  '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,7 +255,7 @@ export interface FileRoutesById {
   '/calcados': typeof CalcadosRoute
   '/camisaria': typeof CamisariaRoute
   '/categorias': typeof CategoriasRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/clientes': typeof ClientesRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
@@ -216,14 +264,20 @@ export interface FileRoutesById {
   '/fornecedores': typeof FornecedoresRoute
   '/login': typeof LoginRoute
   '/meu-perfil': typeof MeuPerfilRoute
+  '/meus-pedidos': typeof MeusPedidosRoute
   '/perfis': typeof PerfisRoute
   '/produtos': typeof ProdutosRoute
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
+  '/checkout/cancelado': typeof CheckoutCanceladoRoute
+  '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores_/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
   '/pedidos-compra/historico': typeof PedidosCompraHistoricoRoute
+  '/pedidos-venda/historico': typeof PedidosVendaHistoricoRoute
+  '/api/public/stripe/webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -243,14 +297,20 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
+    | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
+    | '/api/public/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -268,14 +328,20 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
+    | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
+    | '/api/public/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -293,14 +359,20 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/login'
     | '/meu-perfil'
+    | '/meus-pedidos'
     | '/perfis'
     | '/produtos'
     | '/ternos'
     | '/usuarios'
+    | '/checkout/cancelado'
+    | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores_/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
     | '/pedidos-compra/historico'
+    | '/pedidos-venda/historico'
+    | '/api/public/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,7 +382,7 @@ export interface RootRouteChildren {
   CalcadosRoute: typeof CalcadosRoute
   CamisariaRoute: typeof CamisariaRoute
   CategoriasRoute: typeof CategoriasRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   ClientesRoute: typeof ClientesRoute
   ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
@@ -319,6 +391,7 @@ export interface RootRouteChildren {
   FornecedoresRoute: typeof FornecedoresRoute
   LoginRoute: typeof LoginRoute
   MeuPerfilRoute: typeof MeuPerfilRoute
+  MeusPedidosRoute: typeof MeusPedidosRoute
   PerfisRoute: typeof PerfisRoute
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
@@ -327,6 +400,8 @@ export interface RootRouteChildren {
   PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
   PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
   PedidosCompraHistoricoRoute: typeof PedidosCompraHistoricoRoute
+  PedidosVendaHistoricoRoute: typeof PedidosVendaHistoricoRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -357,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: '/perfis'
       fullPath: '/perfis'
       preLoaderRoute: typeof PerfisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meus-pedidos': {
+      id: '/meus-pedidos'
+      path: '/meus-pedidos'
+      fullPath: '/meus-pedidos'
+      preLoaderRoute: typeof MeusPedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meu-perfil': {
@@ -464,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedidos-venda/historico': {
+      id: '/pedidos-venda/historico'
+      path: '/pedidos-venda/historico'
+      fullPath: '/pedidos-venda/historico'
+      preLoaderRoute: typeof PedidosVendaHistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedidos-compra/historico': {
       id: '/pedidos-compra/historico'
       path: '/pedidos-compra/historico'
@@ -492,8 +581,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FornecedoresPedidoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/sucesso': {
+      id: '/checkout/sucesso'
+      path: '/sucesso'
+      fullPath: '/checkout/sucesso'
+      preLoaderRoute: typeof CheckoutSucessoRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/checkout/dados': {
+      id: '/checkout/dados'
+      path: '/dados'
+      fullPath: '/checkout/dados'
+      preLoaderRoute: typeof CheckoutDadosRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/checkout/cancelado': {
+      id: '/checkout/cancelado'
+      path: '/cancelado'
+      fullPath: '/checkout/cancelado'
+      preLoaderRoute: typeof CheckoutCanceladoRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/api/public/stripe/webhook': {
+      id: '/api/public/stripe/webhook'
+      path: '/api/public/stripe/webhook'
+      fullPath: '/api/public/stripe/webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface CheckoutRouteChildren {
+  CheckoutCanceladoRoute: typeof CheckoutCanceladoRoute
+  CheckoutDadosRoute: typeof CheckoutDadosRoute
+  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutCanceladoRoute: CheckoutCanceladoRoute,
+  CheckoutDadosRoute: CheckoutDadosRoute,
+  CheckoutSucessoRoute: CheckoutSucessoRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -502,7 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalcadosRoute: CalcadosRoute,
   CamisariaRoute: CamisariaRoute,
   CategoriasRoute: CategoriasRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   ClientesRoute: ClientesRoute,
   ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
@@ -511,6 +644,7 @@ const rootRouteChildren: RootRouteChildren = {
   FornecedoresRoute: FornecedoresRoute,
   LoginRoute: LoginRoute,
   MeuPerfilRoute: MeuPerfilRoute,
+  MeusPedidosRoute: MeusPedidosRoute,
   PerfisRoute: PerfisRoute,
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
@@ -519,6 +653,8 @@ const rootRouteChildren: RootRouteChildren = {
   PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
   PagamentosHistoricoRoute: PagamentosHistoricoRoute,
   PedidosCompraHistoricoRoute: PedidosCompraHistoricoRoute,
+  PedidosVendaHistoricoRoute: PedidosVendaHistoricoRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
