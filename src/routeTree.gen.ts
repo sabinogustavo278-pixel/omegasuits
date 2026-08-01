@@ -32,6 +32,7 @@ import { Route as PedidosCompraHistoricoRouteImport } from './routes/pedidos-com
 import { Route as PagamentosHistoricoRouteImport } from './routes/pagamentos.historico'
 import { Route as PagamentosConfiguracoesRouteImport } from './routes/pagamentos.configuracoes'
 import { Route as FornecedoresPedidoRouteImport } from './routes/fornecedores_.pedido'
+import { Route as CheckoutSucessoRouteImport } from './routes/checkout.sucesso'
 import { Route as CheckoutDadosRouteImport } from './routes/checkout.dados'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe/webhook'
 
@@ -150,6 +151,11 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   path: '/fornecedores/pedido',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
+  id: '/sucesso',
+  path: '/sucesso',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const CheckoutDadosRoute = CheckoutDadosRouteImport.update({
   id: '/dados',
   path: '/dados',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/ternos': typeof TernosRoute
   '/usuarios': typeof UsuariosRoute
   '/checkout/dados': typeof CheckoutDadosRoute
+  '/checkout/sucesso': typeof CheckoutSucessoRoute
   '/fornecedores_/pedido': typeof FornecedoresPedidoRoute
   '/pagamentos/configuracoes': typeof PagamentosConfiguracoesRoute
   '/pagamentos/historico': typeof PagamentosHistoricoRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/ternos'
     | '/usuarios'
     | '/checkout/dados'
+    | '/checkout/sucesso'
     | '/fornecedores_/pedido'
     | '/pagamentos/configuracoes'
     | '/pagamentos/historico'
@@ -517,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FornecedoresPedidoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/sucesso': {
+      id: '/checkout/sucesso'
+      path: '/sucesso'
+      fullPath: '/checkout/sucesso'
+      preLoaderRoute: typeof CheckoutSucessoRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/checkout/dados': {
       id: '/checkout/dados'
       path: '/dados'
@@ -536,10 +555,12 @@ declare module '@tanstack/react-router' {
 
 interface CheckoutRouteChildren {
   CheckoutDadosRoute: typeof CheckoutDadosRoute
+  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
 }
 
 const CheckoutRouteChildren: CheckoutRouteChildren = {
   CheckoutDadosRoute: CheckoutDadosRoute,
+  CheckoutSucessoRoute: CheckoutSucessoRoute,
 }
 
 const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
