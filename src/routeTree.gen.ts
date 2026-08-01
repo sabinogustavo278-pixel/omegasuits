@@ -165,19 +165,19 @@ const FornecedoresPedidoRoute = FornecedoresPedidoRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutSucessoRoute = CheckoutSucessoRouteImport.update({
-  id: '/sucesso',
-  path: '/sucesso',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/sucesso',
+  path: '/checkout/sucesso',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutDadosRoute = CheckoutDadosRouteImport.update({
-  id: '/dados',
-  path: '/dados',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/dados',
+  path: '/checkout/dados',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutCanceladoRoute = CheckoutCanceladoRouteImport.update({
-  id: '/cancelado',
-  path: '/cancelado',
-  getParentRoute: () => CheckoutRoute,
+  id: '/checkout/cancelado',
+  path: '/checkout/cancelado',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe/webhook',
@@ -395,6 +395,9 @@ export interface RootRouteChildren {
   ProdutosRoute: typeof ProdutosRoute
   TernosRoute: typeof TernosRoute
   UsuariosRoute: typeof UsuariosRoute
+  CheckoutCanceladoRoute: typeof CheckoutCanceladoRoute
+  CheckoutDadosRoute: typeof CheckoutDadosRoute
+  CheckoutSucessoRoute: typeof CheckoutSucessoRoute
   FornecedoresPedidoRoute: typeof FornecedoresPedidoRoute
   PagamentosConfiguracoesRoute: typeof PagamentosConfiguracoesRoute
   PagamentosHistoricoRoute: typeof PagamentosHistoricoRoute
@@ -583,24 +586,24 @@ declare module '@tanstack/react-router' {
     }
     '/checkout/sucesso': {
       id: '/checkout/sucesso'
-      path: '/sucesso'
+      path: '/checkout/sucesso'
       fullPath: '/checkout/sucesso'
       preLoaderRoute: typeof CheckoutSucessoRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/checkout/dados': {
       id: '/checkout/dados'
-      path: '/dados'
+      path: '/checkout/dados'
       fullPath: '/checkout/dados'
       preLoaderRoute: typeof CheckoutDadosRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/checkout/cancelado': {
       id: '/checkout/cancelado'
-      path: '/cancelado'
+      path: '/checkout/cancelado'
       fullPath: '/checkout/cancelado'
       preLoaderRoute: typeof CheckoutCanceladoRouteImport
-      parentRoute: typeof CheckoutRoute
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/stripe/webhook': {
       id: '/api/public/stripe/webhook'
@@ -632,6 +635,9 @@ const rootRouteChildren: RootRouteChildren = {
   ProdutosRoute: ProdutosRoute,
   TernosRoute: TernosRoute,
   UsuariosRoute: UsuariosRoute,
+  CheckoutCanceladoRoute: CheckoutCanceladoRoute,
+  CheckoutDadosRoute: CheckoutDadosRoute,
+  CheckoutSucessoRoute: CheckoutSucessoRoute,
   FornecedoresPedidoRoute: FornecedoresPedidoRoute,
   PagamentosConfiguracoesRoute: PagamentosConfiguracoesRoute,
   PagamentosHistoricoRoute: PagamentosHistoricoRoute,
@@ -643,13 +649,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
