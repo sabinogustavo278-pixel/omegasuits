@@ -80,6 +80,7 @@ export type Database = {
           total_pedidos: number
           ultima_compra: string | null
           updated_at: string
+          user_id: string | null
           valor_total_gasto: number
         }
         Insert: {
@@ -100,6 +101,7 @@ export type Database = {
           total_pedidos?: number
           ultima_compra?: string | null
           updated_at?: string
+          user_id?: string | null
           valor_total_gasto?: number
         }
         Update: {
@@ -120,6 +122,7 @@ export type Database = {
           total_pedidos?: number
           ultima_compra?: string | null
           updated_at?: string
+          user_id?: string | null
           valor_total_gasto?: number
         }
         Relationships: []
@@ -507,12 +510,16 @@ export type Database = {
           desconto: number | null
           endereco_entrega: string | null
           estado_entrega: string | null
+          estoque_baixado: boolean
           frete: number | null
           id: string
           metodo_pagamento: string | null
           numero: string | null
           observacoes: string | null
           status: string
+          status_entrega: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           subtotal: number | null
           updated_at: string
           valor_total: number | null
@@ -526,12 +533,16 @@ export type Database = {
           desconto?: number | null
           endereco_entrega?: string | null
           estado_entrega?: string | null
+          estoque_baixado?: boolean
           frete?: number | null
           id?: string
           metodo_pagamento?: string | null
           numero?: string | null
           observacoes?: string | null
           status?: string
+          status_entrega?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           subtotal?: number | null
           updated_at?: string
           valor_total?: number | null
@@ -545,12 +556,16 @@ export type Database = {
           desconto?: number | null
           endereco_entrega?: string | null
           estado_entrega?: string | null
+          estoque_baixado?: boolean
           frete?: number | null
           id?: string
           metodo_pagamento?: string | null
           numero?: string | null
           observacoes?: string | null
           status?: string
+          status_entrega?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           subtotal?: number | null
           updated_at?: string
           valor_total?: number | null
@@ -968,6 +983,7 @@ export type Database = {
           total_pedidos: number
           ultima_compra: string | null
           updated_at: string
+          user_id: string | null
           valor_total_gasto: number
         }[]
         SetofOptions: {
@@ -1020,6 +1036,27 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      list_meus_pedidos: {
+        Args: never
+        Returns: {
+          cep_entrega: string
+          cidade_entrega: string
+          data_pedido: string
+          desconto: number
+          endereco_entrega: string
+          estado_entrega: string
+          frete: number
+          id: string
+          itens: Json
+          metodo_pagamento: string
+          numero: string
+          status: string
+          status_entrega: string
+          subtotal: number
+          total_itens: number
+          valor_total: number
+        }[]
       }
       list_pagamentos: {
         Args: { _data_fim?: string; _data_inicio?: string; _status?: string }
