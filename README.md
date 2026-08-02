@@ -1,18 +1,14 @@
 # Omega Suits 
 
-Crie a estrutura de uma landing page e catálogo de e-commerce premium para uma marca de moda masculina clássica e alfaiataria chamada Omega Suits.
+Como minha primeira experiência fazendo o meu primeiro projeto de tecnologia creio que a muitas coisas a serem melhoradas. 
+O desenvolvimento do projeto foi feito com IA (inteligência Artificial) generativa, sendo assim, não foi eu que desenvolvi os códigos, executei somente os prompts no chat da Lovable. Deu para ter uma boa noção de como funciona por trás das câmeras de um site e como é criado do zero um, todos os códigos, refatoração e melhoria das páginas, escolha estratégica de cada função das paginas, banco de dados (supabase), pagamentos (stripe) e entre outros.
+Confesso que tive um tempo muito apertado para fazer esse site, essa semana foram boas horas para tentar finalizar ele no tempo correto, fiz quase que um mínimo produto viável para dar tempo, mas sinto que valeu muito a pena a experiência, e finalizo esse projeto com um novo olhar sobre o mundo da tecnologia que é incrível e muito vasto. Vira mais projetos por aí!!
 
-A estrutura deve conter:
-
-Um cabeçalho minimalista com o nome da marca e um menu de navegação (Ternos, Camisaria, Calçados, Acessórios).
-
-Uma seção de destaque (Hero) com um título elegante chamando para a nova coleção de alfaiataria e um botão de 'Ver Coleção'.
-
-Uma grade (grid) de produtos exibindo itens de exemplo (Terno, Sapato Oxford, Gravata de Seda), contendo espaço para a foto, nome do produto e preço.
-
-Um rodapé simples.
-
-Estilo visual: O design deve ser altamente sofisticado, luxuoso e limpo (clean). Use uma paleta de cores sóbria baseada em tons de azul marinho, cinza escuro, preto e branco, com detalhes sutis em dourado ou prata. Use uma tipografia serifada elegante para os títulos e uma fonte sem serifa limpa para os textos menores.
+##  Tecnologias Utilizadas
+**Frontend:** React, Tailwind CSS, Vite, TypeScript
+**Backend:** Supabase 
+**Pagamentos:** Stripe
+**Ferramenta de IA:** Lovable
 
 This project was built with [Lovable](https://lovable.dev).
 
