@@ -1,20 +1,19 @@
-## 1. Restaurar a versão estável
-A restauração não pode ser feita por mim escrevendo código (isso misturaria versões). Você faz em 2 cliques:
-- Abra o Histórico (botão abaixo) e escolha a última versão da Lovable de antes do envio do GitHub (antes da mensagem "Preciso que você arrume esses erros..."), ou clique no botão de reverter abaixo dessa mensagem no chat.
-- Depois, eu confiro se o site está conectado ao banco certo da loja.
+## 1. Envio do GitHub
+- Pelo seu print, o envio alterou apenas o README (texto de apresentação). Nenhum código foi trocado, então não é preciso restaurar nada. O aviso laranja pode ser dispensado.
+- Vou só confirmar que o site abre e conecta ao banco da loja normalmente.
 
 ## 2. Senhas vazadas
-- Ignorado: recurso exclusivo do plano Pro do Supabase. Fica registrado como limitação aceita.
+- Ignorado: recurso exclusivo do plano Pro do Supabase.
 
 ## 3. Funções internas
-- Retirar de usuários logados a permissão de chamar diretamente as 4 funções internas sinalizadas, mantendo as que o próprio site usa (ex.: verificação de cargo usada pelas regras de acesso) funcionando via regras do banco.
-- Conferir login, painel e checkout após a mudança.
+- Retirar de usuários logados a permissão de chamar diretamente as funções internas sinalizadas que não precisam disso.
+- Funções usadas pelas regras de acesso (verificação de cargo) continuam funcionando; o aviso delas fica registrado como aceito, com justificativa.
+- Conferir login, painel e checkout depois.
 
 ## 4. Atualização dos pacotes (16 avisos)
-- Atualizar apenas as versões dos pacotes com falhas conhecidas, sem trocar bibliotecas nem mudar telas ou o fluxo de compra.
+- Atualizar só as versões dos pacotes com falhas conhecidas, sem trocar bibliotecas nem mudar telas ou o fluxo de compra.
 - Conferir que o site compila e abre normalmente.
 
 ## Detalhes técnicos
-- Listar funções SECURITY DEFINER com EXECUTE para `authenticated`; revogar das que são apenas gatilhos/internas. Para `has_role`/funções usadas em RLS ou chamadas via RPC pelo app, manter EXECUTE (necessário) e marcar o aviso como aceito com justificativa.
-- Pacotes: `security--dependency_scan`, então `bun update` dos afetados dentro da mesma versão principal; marcar achados como resolvidos.
-- Executar somente após a restauração, para não aplicar mudanças sobre a versão errada.
+- Consultar `pg_proc`/grants das funções SECURITY DEFINER; `REVOKE EXECUTE ... FROM authenticated` nas que são só gatilhos; manter `has_profile`/`is_admin_or_gerente`/`list_meus_pedidos`/`list_pedidos_cliente` (usadas em RLS/RPC).
+- Pacotes: `security--dependency_scan`, atualizar dentro da mesma versão principal, marcar achados como resolvidos.
